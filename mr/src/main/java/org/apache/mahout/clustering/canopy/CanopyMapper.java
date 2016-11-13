@@ -34,7 +34,8 @@ class CanopyMapper extends
 
   private CanopyClusterer canopyClusterer;
 
-  private int clusterFilter;
+  //如果一个中心点所在的圆周,包含超过clusterFilter数量的才可以称之为一个聚类点,否则不算一个分类
+  private int clusterFilter;//本次计算观察的点数超过了clusterFilter阈值,则写入程序,如果没有超过该阈值,则不会当做中心点处理,即不会写入到reduce中
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point,
@@ -56,9 +57,9 @@ class CanopyMapper extends
       InterruptedException {
     for (Canopy canopy : canopies) {
       canopy.computeParameters();
-      if (canopy.getNumObservations() > clusterFilter) {
+      if (canopy.getNumObservations() > clusterFilter) {//本次计算观察的点数超过了clusterFilter阈值,则写入程序,如果没有超过该阈值,则不会当做中心点处理,即不会写入到reduce中
         context.write(new Text("centroid"), new VectorWritable(canopy
-            .getCenter()));
+            .getCenter()));//设置一个中心点,写到输出中
       }
     }
     super.cleanup(context);

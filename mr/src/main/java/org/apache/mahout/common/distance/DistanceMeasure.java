@@ -31,6 +31,7 @@ public interface DistanceMeasure extends Parametered {
    * @param v2
    *          a Vector defining a multidimensional point in some feature space
    * @return a scalar doubles of the distance
+   * 计算两个向量之间的距离
    */
   double distance(Vector v1, Vector v2);
   
@@ -42,6 +43,7 @@ public interface DistanceMeasure extends Parametered {
    *          Square of the length of centroid
    * @param centroid
    *          Centroid vector
+   * 计算两个向量之间的距离,并且第一个参数给出了centroid向量的模长度的平方,即centroid向量的getLengthSquared值
    */
   double distance(double centroidLengthSquare, Vector centroid, Vector v);
   

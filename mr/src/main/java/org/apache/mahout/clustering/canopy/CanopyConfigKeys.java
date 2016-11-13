@@ -37,7 +37,7 @@ public final class CanopyConfigKeys {
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
 
-  public static final String CF_KEY = "org.apache.mahout.clustering.canopy.canopyFilter";
+  public static final String CF_KEY = "org.apache.mahout.clustering.canopy.canopyFilter";//CanopyDriver中默认值是0,即有1个点就可以认为是一个聚类点
 
   /**
    * Create a {@link CanopyClusterer} from the Hadoop configuration.

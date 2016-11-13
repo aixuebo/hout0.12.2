@@ -47,27 +47,28 @@ import org.slf4j.LoggerFactory;
  * 
  * 将text文件转换成sequence文件,并且转换后的value是VectorWritable类型的
  * 要求text的文件是每一行一组维度,每一个维度值用空格分开
+ sh bin/mahout org.apache.mahout.clustering.conversion.InputDriver --input /log/mahout/canopy_test --output /log/mahout/output/canopy_test  -v org.apache.mahout.math.RandomAccessSparseVector
  */
 public final class InputDriver {
 
   private static final Logger log = LoggerFactory.getLogger(InputDriver.class);
-  
+
   private InputDriver() {
   }
-  
+
   public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
+
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
       abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
       "The vector implementation to use.").withShortName("v").create();
-    
+
     Option helpOpt = DefaultOptionCreator.helpOption();
-    
+
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(
       vectorOpt).withOption(helpOpt).create();
 
@@ -79,7 +80,7 @@ public final class InputDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      
+
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       String vectorClassName = cmdLine.getValue(vectorOpt,

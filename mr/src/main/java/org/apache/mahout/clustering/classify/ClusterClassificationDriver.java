@@ -72,7 +72,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.")
-        .create());
+        .create());//clusters,必须是SequenceFile序列化文件
     
     if (parseArguments(args) == null) {
       return -1;
@@ -84,9 +84,9 @@ public final class ClusterClassificationDriver extends AbstractJob {
     if (getConf() == null) {
       setConf(new Configuration());
     }
-    Path clustersIn = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));
+    Path clustersIn = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));//clusters
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
-        DefaultOptionCreator.SEQUENTIAL_METHOD);
+        DefaultOptionCreator.SEQUENTIAL_METHOD);//运行方式,是本地还是集群上运行
     
     double clusterClassificationThreshold = 0.0;
     if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {

@@ -29,6 +29,9 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+/**
+ * 表示如果对一个中心点进行编辑距离计算
+ */
 public class DistanceMeasureCluster extends AbstractCluster {
 
   private DistanceMeasure measure;

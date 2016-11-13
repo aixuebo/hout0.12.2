@@ -366,9 +366,9 @@ public class CanopyDriver extends AbstractJob {
   }
 
   private static void clusterData(Configuration conf,
-                                  Path points,
-                                  Path canopies,
-                                  Path output,
+                                  Path points,//所有点的输入
+                                  Path canopies,//用canopy计算出来的中心点集合存储路径,这个路径下存储的不是中心点,而是中心点组成的Canopy对象,实例是AbstractCluster
+                                  Path output,//最终结果的输出
                                   double clusterClassificationThreshold,
                                   boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {

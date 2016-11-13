@@ -626,6 +626,7 @@ public final class Functions {
   /** Function that returns <tt>a - b</tt>. */
   public static final DoubleDoubleFunction MINUS = plusMult(-1);
 
+  //计算向量距离时候使用,用于x-y的平方
   public static final DoubleDoubleFunction MINUS_SQUARED = new DoubleDoubleFunction() {
     @Override
     public double apply(double x, double y) {

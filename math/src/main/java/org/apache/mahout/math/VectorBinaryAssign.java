@@ -58,6 +58,8 @@ import java.util.Iterator;
  *
  * See https://docs.google.com/document/d/1g1PjUuvjyh2LBdq2_rKLIcUiDbeOORA1sCJiSsz-JVU/edit# for a more detailed
  * explanation.
+ *
+ * 根据f函数的特性,选择一个最优秀的方式去计算  x和y向量的每一个对应的值,当做参数传入到f中,结果改变x向量的每一个元素的值
  */
 public abstract class VectorBinaryAssign {
   public static final VectorBinaryAssign[] OPERATIONS = {
@@ -84,22 +86,26 @@ public abstract class VectorBinaryAssign {
 
   /**
    * Returns true iff we can use this algorithm to apply f to x and y component-wise and assign the result to x.
+   * 返回该函数是否有效应对x和y这两个向量
    */
   public abstract boolean isValid(Vector x, Vector y, DoubleDoubleFunction f);
 
   /**
    * Estimates the cost of using this algorithm to compute the assignment. The algorithm is assumed to be valid.
+   * 如果该函数f有效应对,则估算一下计算量的价值
    */
   public abstract double estimateCost(Vector x, Vector y, DoubleDoubleFunction f);
 
   /**
-   * Main method that applies f to x and y component-wise assigning the results to x. It returns the modified vector,
-   * x.
+   * Main method that applies f to x and y component-wise assigning the results to x. It returns the modified vector, x.
+   * 真正使用该方法去计算
+   * 根据f函数的特性,选择一个最优秀的方式去计算  x和y向量的每一个对应的值,当做参数传入到f中,结果改变x向量的每一个元素的值
    */
   public abstract Vector assign(Vector x, Vector y, DoubleDoubleFunction f);
 
   /**
    * The best operation is the least expensive valid one.
+   * 最好的操作就是最少花钱并且有效的一个方式
    */
   public static VectorBinaryAssign getBestOperation(Vector x, Vector y, DoubleDoubleFunction f) {
     int bestOperationIndex = -1;
@@ -107,7 +113,7 @@ public abstract class VectorBinaryAssign {
     for (int i = 0; i < OPERATIONS.length; ++i) {
       if (OPERATIONS[i].isValid(x, y, f)) {
         double cost = OPERATIONS[i].estimateCost(x, y, f);
-        if (cost < bestCost) {
+        if (cost < bestCost) {//选择一个最有价值的,即cost最小的,选择这个就可以
           bestCost = cost;
           bestOperationIndex = i;
         }
@@ -120,6 +126,7 @@ public abstract class VectorBinaryAssign {
    * This is the method that should be used when assigning. It selects the best algorithm and applies it.
    * Note that it does NOT invalidate the cached length of the Vector and should only be used through the wrapprs
    * in AbstractVector.
+   * 选择一个最好的方式去计算结果
    */
   public static Vector assignBest(Vector x, Vector y, DoubleDoubleFunction f) {
     return getBestOperation(x, y, f).assign(x, y, f);
@@ -127,9 +134,11 @@ public abstract class VectorBinaryAssign {
 
   /**
    * If f(0, y) = 0, the zeros in x don't matter and we can simply iterate through the nonzeros of x.
+   * 如果函数f符合无论y是什么,只要x=0,则f结果就是0的时候,我们就很简单的循环x是非0的元素即可
    * To get the corresponding element of y, we perform a lookup.
-   * There are no *Merge or *Inplace versions because in this case x cannot become more dense because of f, meaning
-   * all changes will occur at indices whose values are already nonzero.
+   * There are no *Merge or *Inplace versions because in this case x cannot become more dense because of f,
+   * meaning all changes will occur at indices whose values are already nonzero.
+   * 由于函数f的特性,意味着所有的元素的变更将会发生在索引处,索引处的值都已经是非0的元素了,即只会发生在非0元素上才会被更改
    */
   public static class AssignNonzerosIterateThisLookupThat extends VectorBinaryAssign {
 
@@ -140,13 +149,18 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public double estimateCost(Vector x, Vector y, DoubleDoubleFunction f) {
+      /**
+       * 返回非默认值的数量,比如在一个松散向量中,返回的是非0的元素数量
+       * 去估计一个操作的价值--去迭代非0元素的时间
+       * 去估计一个价值---获取一个随机元素的时间
+       */
       return x.getNumNondefaultElements() * x.getIteratorAdvanceCost() * y.getLookupCost();
     }
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       for (Element xe : x.nonZeroes()) {
-        xe.set(f.apply(xe.get(), y.getQuick(xe.index())));
+        xe.set(f.apply(xe.get(), y.getQuick(xe.index())));//将x和y相对应的数据用函数f处理后,存储到x上
       }
       return x;
     }
@@ -154,7 +168,9 @@ public abstract class VectorBinaryAssign {
 
   /**
    * If f(x, 0) = x, the zeros in y don't matter and we can simply iterate through the nonzeros of y.
+   * y中是0的元素不重要,因为只要y=0,结果一定就是x,因此我们可以通过迭代y的非0元素
    * We get the corresponding element of x through a lookup and update x inplace.
+   * 当y是0元素的时候,x的值是不需要变化的,因此只需要迭代y非0的元素即可,计算好的值更改x对应的元素
    */
   public static class AssignNonzerosIterateThatLookupThisInplaceUpdates extends VectorBinaryAssign {
 
@@ -163,6 +179,11 @@ public abstract class VectorBinaryAssign {
       return f.isLikeRightPlus();
     }
 
+    /**
+     * y中非0元素的数量
+     * 去估计一个操作的价值--去迭代非0元素的时间
+     * 获取x一个随机元素的时间
+     */
     @Override
     public double estimateCost(Vector x, Vector y, DoubleDoubleFunction f) {
       return y.getNumNondefaultElements() * y.getIteratorAdvanceCost() * x.getLookupCost() * x.getLookupCost();
@@ -171,6 +192,8 @@ public abstract class VectorBinaryAssign {
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       for (Element ye : y.nonZeroes()) {
+        //第一个参数是定位到要更改x的哪个元素
+        //第二个参数是x的值与y的值 用f函数处理,最新值才是更新的值
         x.setQuick(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
       return x;
@@ -180,6 +203,7 @@ public abstract class VectorBinaryAssign {
   /**
    * If f(x, 0) = x, the zeros in y don't matter and we can simply iterate through the nonzeros of y.
    * We get the corresponding element of x through a lookup and update x by merging.
+   * 与上面方法一样,只是针对如果y是稀松向量的时候会更好用
    */
   public static class AssignNonzerosIterateThatLookupThisMergeUpdates extends VectorBinaryAssign {
 
@@ -195,10 +219,13 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
-      for (Element ye : y.nonZeroes()) {
+      OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);//产生一个稀松向量
+      for (Element ye : y.nonZeroes()) {//循环y的非0向量元素
+        //更新非0向量序号,和x与y计算的值
         updates.set(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
+
+      //x去合并这些值即可
       x.mergeUpdates(updates);
       return x;
     }
@@ -265,6 +292,7 @@ public abstract class VectorBinaryAssign {
 
   /**
    * If f(0, 0) = 0 we can iterate through the nonzeros in either x or y.
+   * 只有x和y都是0的时候,结果就是0,要遍历x和y的所有的非0元素,只要有一个不是0的,都要去计算
    * In this case we iterate through them in parallel and update x by merging. Because we're iterating through
    * both vectors at the same time, x and y need to support sequential access.
    */

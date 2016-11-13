@@ -27,9 +27,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 表示一个带有权重的向量,因此包含一个向量 以及该向量对应的权重值
+ * 同时还增加了一些额外的属性信息对象
+ */
 public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
 
-  private Map<Text, Text> properties;
+  private Map<Text, Text> properties;//属性信息对象
 
   public WeightedPropertyVectorWritable() {
   }

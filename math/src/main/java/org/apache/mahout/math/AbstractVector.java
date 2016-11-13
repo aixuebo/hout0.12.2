@@ -195,7 +195,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     return aggregate(x, Functions.PLUS, Functions.MULT);//每个对应的值相乘,然后求和
   }
 
-  //表示两个向量相乘,并且是自己成自己
+  //表示两个向量相乘,并且是自己成自己,即每一个元素的平方和
   protected double dotSelf() {
     return aggregate(Functions.PLUS, Functions.pow(2));
   }
@@ -291,6 +291,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     lengthSquared = -1;
   }
 
+  //获取两个向量的距离的平方和
   @Override
   public double getDistanceSquared(Vector that) {
     if (size != that.size()) {
@@ -299,12 +300,12 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     double thisLength = getLengthSquared();
     double thatLength = that.getLengthSquared();
     double dot = dot(that);
-    double distanceEstimate = thisLength + thatLength - 2 * dot;
+    double distanceEstimate = thisLength + thatLength - 2 * dot;//(|x|)平方 + |y|平方 - 2xy 即x的向量模平方+y的向量模平方-2xy的点积
     if (distanceEstimate > 1.0e-3 * (thisLength + thatLength)) {
       // The vectors are far enough from each other that the formula is accurate.
       return Math.max(distanceEstimate, 0);
     } else {
-      return aggregate(that, Functions.PLUS, Functions.MINUS_SQUARED);
+      return aggregate(that, Functions.PLUS, Functions.MINUS_SQUARED);//计算结果是x-y的平方和,属于欧氏距离(EuclideanDistance)的平方公式
     }
   }
 
@@ -584,6 +585,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     return this;
   }
 
+  //将向量本身的每一个元素 与 参数other每一个元素的值,作为参数给function,处理的结果是最终改变向量元素的值
   @Override
   public Vector assign(Vector other, DoubleDoubleFunction function) {
     if (size != other.size()) {

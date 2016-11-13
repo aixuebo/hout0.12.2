@@ -43,19 +43,34 @@ public abstract class AbstractCluster implements Cluster {
   // cluster persistent state
   private int id;//唯一ID
   
-  private long numObservations;
+  private long numObservations;//本次计算观察了多少个点
   
-  private long totalObservations;
+  private long totalObservations;//总观察了多少个点
   
   private Vector center;//中心点
   
-  private Vector radius;
+  private Vector radius;//半径
   
   // the observation statistics
-  private double s0;
-  
+  private double s0;//有多少个点属于该族群Cluster
+
+  /**
+   * 所有属于该族群Cluster的点之和组成的向量,比如三个向量属于该族群Cluster,因此该值就是三个向量每一个元素相加之和组成的新向量,即属于a+b系列
+   * 因此通过该值可以得到中心点是每一个值/s0即可,即中心点是平均值
+   */
   private Vector s1;
-  
+
+  /**
+   * 所有属于该族群Cluster的点组成的数据,比如三个向量,
+   * a.1 3 5
+   * b.4 6 8
+   * c.1 6 8
+   * 则分别去取模的平方,即
+   * a. 1 9 25
+   * b.16 36 64
+   * c.1 36 64
+   * 因此s2是最终a+b+c组成的向量,即 18,9+36+36,25+64+64
+   */
   private Vector s2;
 
   private static final ObjectMapper jxn = new ObjectMapper();
@@ -260,13 +275,13 @@ public abstract class AbstractCluster implements Cluster {
     if (getS1() == null) {
       setS1(x.clone());
     } else {
-      getS1().assign(x, Functions.PLUS);
+      getS1().assign(x, Functions.PLUS);//Functions.PLUS是a + b*constant函数,constant = 1,因此就是a+b函数,即s1原来的值+x向量的值,组成新的值,赋值给s1
     }
-    Vector x2 = x.times(x);
+    Vector x2 = x.times(x);//自己乘以自己,得到该x向量模的平方
     if (getS2() == null) {
       setS2(x2);
     } else {
-      getS2().assign(x2, Functions.PLUS);
+      getS2().assign(x2, Functions.PLUS);//Functions.PLUS是a + b*constant函数,constant = 1,因此就是s2原来的值+向量x模的平方,组成新的值,赋值给s2
     }
   }
   
@@ -278,7 +293,7 @@ public abstract class AbstractCluster implements Cluster {
     }
     setNumObservations((long) getS0());
     setTotalObservations(getTotalObservations() + getNumObservations());
-    setCenter(getS1().divide(getS0()));
+    setCenter(getS1().divide(getS0()));//中心点就是所有点坐标的平均值
     // compute the component stds
     if (getS0() > 1) {
       setRadius(getS2().times(getS0()).minus(getS1().times(getS1())).assign(new SquareRootFunction()).divide(getS0()));
@@ -329,7 +344,7 @@ public abstract class AbstractCluster implements Cluster {
    */
   public Vector computeCentroid() {
     return getS0() == 0 ? getCenter() : getS1().divide(getS0());
-  }
+  }//中心点就是所有点的平均值
 
   /**
    * Return a human-readable formatted string representation of the vector, not

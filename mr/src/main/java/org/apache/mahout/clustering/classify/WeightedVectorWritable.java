@@ -26,6 +26,9 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+/**
+ * 表示一个带有权重的向量,因此包含一个向量 以及该向量对应的权重值
+ */
 public class WeightedVectorWritable implements Writable {
 
   private final VectorWritable vectorWritable = new VectorWritable();

@@ -42,6 +42,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * Get the id of the Cluster
    * 
    * @return a unique integer
+   * 聚类的唯一ID,即第几个聚类,每一个ID表示一个聚类
    */
   int getId();
   
@@ -49,6 +50,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * Get the "center" of the Cluster as a Vector
    * 
    * @return a Vector
+   * 该聚类的一个中心点,该中心点实现上是会根据聚类所有点的集合进行不断变化的
    */
   Vector getCenter();
   
@@ -58,6 +60,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * clusters may return zero values if not appropriate.
    * 
    * @return aVector
+   * 表示以该中心点为圆心,多大范围半径内都是该聚类的范围
    */
   Vector getRadius();
     
@@ -68,6 +71,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    *          an optional String[] containing labels used to format the primary
    *          Vector/s of this implementation.
    * @return a String
+   * 格式化输出
    */
   String asFormatString(String[] bindings);
 
@@ -78,6 +82,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    *          an optional String[] containing labels used to format the primary
    *          Vector/s of this implementation.
    * @return a Map
+   * 格式化输出
    */
   Map<String,Object> asJson(String[] bindings);
 
