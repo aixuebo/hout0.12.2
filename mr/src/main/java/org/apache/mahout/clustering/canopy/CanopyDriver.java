@@ -74,7 +74,7 @@ public class CanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.t3Option().create());
     addOption(DefaultOptionCreator.t4Option().create());
-    addOption(DefaultOptionCreator.clusterFilterOption().create());
+    addOption(DefaultOptionCreator.clusterFilterOption().create());//该值用于减少噪音数据,因为噪音数据是少量的数据组成的一类,这样避免噪音数据单独成为一类
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
@@ -101,6 +101,7 @@ public class CanopyDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.T4_OPTION)) {
       t4 = Double.parseDouble(getOption(DefaultOptionCreator.T4_OPTION));
     }
+    //该值用于减少噪音数据,因为噪音数据是少量的数据组成的一类,这样避免噪音数据单独成为一类
     int clusterFilter = 0;
     if (hasOption(DefaultOptionCreator.CLUSTER_FILTER_OPTION)) {
       clusterFilter = Integer

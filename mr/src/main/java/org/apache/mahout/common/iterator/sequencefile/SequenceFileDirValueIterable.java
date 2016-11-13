@@ -29,6 +29,8 @@ import org.apache.hadoop.io.Writable;
 
 /**
  * <p>{@link Iterable} counterpart to {@link SequenceFileDirValueIterator}.</p>
+ * 处理输入源是SequenceFile,并且输入源是目录,即输入源目录下存储的文件是SequenceFile类型的文件
+ * 该类用于不管key是什么,只要每一行文件的value,而value是Writable类型的
  */
 public final class SequenceFileDirValueIterable<V extends Writable> implements Iterable<V> {
 

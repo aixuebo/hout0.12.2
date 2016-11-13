@@ -397,9 +397,10 @@ public abstract class AbstractCluster implements Cluster {
     return terms;
   }
 
+  //计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
   @Override
   public boolean isConverged() {
-    // Convergence has no meaning yet, perhaps in subclasses
+    // Convergence has no meaning yet, perhaps in subclasses该方法返回false,要由子类自己实现,比如参见org.apache.mahout.clustering.kmeans.Kluster类实现
     return false;
   }
 }

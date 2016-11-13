@@ -42,6 +42,8 @@ import org.apache.mahout.common.IOUtils;
  * sequence file, but many. The input path may be specified as a directory of
  * files to read, or as a glob pattern. The set of files may be optionally
  * restricted with a {@link PathFilter}.
+ * 处理输入源是SequenceFile,并且输入源是目录,即输入源目录下存储的文件是SequenceFile类型的文件
+ * 该类用于不管key是什么,只要每一行文件的value,而value是Writable类型的
  */
 public final class SequenceFileDirValueIterator<V extends Writable> extends
     ForwardingIterator<V> implements Closeable {

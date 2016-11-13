@@ -39,6 +39,9 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * keams聚类的入口
+ */
 public class KMeansDriver extends AbstractJob {
   
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
@@ -52,24 +55,28 @@ public class KMeansDriver extends AbstractJob {
     
     addInputOption();
     addOutputOption();
-    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());//距离算法
+
+    ////中心点路径
     addOption(DefaultOptionCreator
         .clustersInOption()
         .withDescription(
             "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
                 + "If k is also specified, then a random set of vectors will be selected"
                 + " and written out to this path first").create());
+
+    //聚类的数量,即k
     addOption(DefaultOptionCreator
         .numClustersOption()
         .withDescription(
             "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
                 + " as the Centroid and written to the clusters input path.").create());
-    addOption(DefaultOptionCreator.useSetRandomSeedOption().create());
-    addOption(DefaultOptionCreator.convergenceOption().create());
-    addOption(DefaultOptionCreator.maxIterationsOption().create());
-    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(DefaultOptionCreator.useSetRandomSeedOption().create());//随机数
+    addOption(DefaultOptionCreator.convergenceOption().create());//距离相差多少后,就不在聚类了
+    addOption(DefaultOptionCreator.maxIterationsOption().create());//最大循环次数
+    addOption(DefaultOptionCreator.overwriteOption().create());//是否覆盖原有目录
     addOption(DefaultOptionCreator.clusteringOption().create());
-    addOption(DefaultOptionCreator.methodOption().create());
+    addOption(DefaultOptionCreator.methodOption().create());//是本地还是集群
     addOption(DefaultOptionCreator.outlierThresholdOption().create());
    
     if (parseArguments(args) == null) {
@@ -83,13 +90,19 @@ public class KMeansDriver extends AbstractJob {
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
+
+    //距离相差多少后,就不在聚类了
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+
+    //最大循环次数
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
-    
+
+    //聚类的数量,即k
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
 
@@ -139,7 +152,7 @@ public class KMeansDriver extends AbstractJob {
     boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     
     // iterate until the clusters converge
-    String delta = Double.toString(convergenceDelta);
+    String delta = Double.toString(convergenceDelta);//聚类距离相差多少后,就不在聚类了
     if (log.isInfoEnabled()) {
       log.info("Input: {} Clusters In: {} Out: {}", input, clustersIn, output);
       log.info("convergence: {} max Iterations: {}", convergenceDelta, maxIterations);

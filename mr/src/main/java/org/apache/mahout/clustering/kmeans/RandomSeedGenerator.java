@@ -61,19 +61,22 @@ public final class RandomSeedGenerator {
     return buildRandom(conf, input, output, k, measure, null);
   }
 
+  //创建k个聚类点,随机方式选择聚类中心点,生成在output/part-randomSeed目录下
+  //最终选择的中心点依然还是input中的k个点
   public static Path buildRandom(Configuration conf,
-                                 Path input,
-                                 Path output,
-                                 int k,
+                                 Path input,//所有输入点
+                                 Path output,//最终随机k个中心点输出在哪里
+                                 int k,//要随机生成几个中心点,即要聚类多少个
                                  DistanceMeasure measure,
-                                 Long seed) throws IOException {
+                                 Long seed)//随机种子
+          throws IOException {
 
-    Preconditions.checkArgument(k > 0, "Must be: k > 0, but k = " + k);
-    // delete the output directory
+    Preconditions.checkArgument(k > 0, "Must be: k > 0, but k = " + k);//k必须大于0
+    // delete the output directory 删除原有的输出目录内容
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     HadoopUtil.delete(conf, output);
-    Path outFile = new Path(output, "part-randomSeed");
-    boolean newFile = fs.createNewFile(outFile);
+    Path outFile = new Path(output, "part-randomSeed");//创建随机生成目录
+    boolean newFile = fs.createNewFile(outFile);//创建输出文件夹
     if (newFile) {
       Path inputPathPattern;
 
@@ -82,38 +85,45 @@ public final class RandomSeedGenerator {
       } else {
         inputPathPattern = input;
       }
-      
+
+      //获得输入文件集合
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
 
+      //产生随机数
       Random random = (seed != null) ? RandomUtils.getRandom(seed) : RandomUtils.getRandom();
 
-      List<Text> chosenTexts = new ArrayList<>(k);
-      List<ClusterWritable> chosenClusters = new ArrayList<>(k);
+      List<Text> chosenTexts = new ArrayList<>(k);//存放文件中的key
+      List<ClusterWritable> chosenClusters = new ArrayList<>(k);//k个中心点对象,存储文件中的value,而value就是VectorWritable类型的
       int nextClusterId = 0;
 
-      int index = 0;
+      int index = 0;//处理每一条都累加1,即处理了多少条记录
       for (FileStatus fileStatus : inputFiles) {
         if (!fileStatus.isDir()) {
           for (Pair<Writable, VectorWritable> record
-              : new SequenceFileIterable<Writable, VectorWritable>(fileStatus.getPath(), true, conf)) {
+              : new SequenceFileIterable<Writable, VectorWritable>(fileStatus.getPath(), true, conf)) {//读取输入源,输入源必须是序列化的文件,并且格式还是Writable, VectorWritable形式的,即value一定是向量形式的
+            //读取key和向量形式的value
             Writable key = record.getFirst();
             VectorWritable value = record.getSecond();
+
+            //用value向量做成一个中心点
             Kluster newCluster = new Kluster(value.get(), nextClusterId++, measure);
-            newCluster.observe(value.get(), 1);
+            newCluster.observe(value.get(), 1);//将该节点进行观察,即加入到中心点中,权重是1
+
+            //最终选择的中心点依然还是input中的k个点
             Text newText = new Text(key.toString());
-            int currentSize = chosenTexts.size();
-            if (currentSize < k) {
-              chosenTexts.add(newText);
+            int currentSize = chosenTexts.size();//选择的文本大小
+            if (currentSize < k) {//如果选择的还没有满足k
+              chosenTexts.add(newText);//添加新的key
               ClusterWritable clusterWritable = new ClusterWritable();
               clusterWritable.setValue(newCluster);
               chosenClusters.add(clusterWritable);
-            } else {
-              int j = random.nextInt(index);
-              if (j < k) {
-                chosenTexts.set(j, newText);
+            } else {//说明已经选择k个了
+              int j = random.nextInt(index);//从处理多少条记录中随机产生一个数字
+              if (j < k) {//如果数字<k,说明被随机选择对了
+                chosenTexts.set(j, newText);//则设置该值
                 ClusterWritable clusterWritable = new ClusterWritable();
                 clusterWritable.setValue(newCluster);
-                chosenClusters.set(j, clusterWritable);
+                chosenClusters.set(j, clusterWritable);//重新设置中心点
               }
             }
             index++;
@@ -121,6 +131,7 @@ public final class RandomSeedGenerator {
         }
       }
 
+      //将chosenTexts的内容写入到输出中,即最终随机中心点已经确认
       try (SequenceFile.Writer writer =
                SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class)){
         for (int i = 0; i < chosenTexts.size(); i++) {

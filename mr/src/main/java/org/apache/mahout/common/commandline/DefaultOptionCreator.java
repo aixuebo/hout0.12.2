@@ -29,9 +29,9 @@ public final class DefaultOptionCreator {
   
   public static final String CLUSTERING_OPTION = "clustering";
   
-  public static final String CLUSTERS_IN_OPTION = "clusters";
+  public static final String CLUSTERS_IN_OPTION = "clusters";//中心点路径
   
-  public static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";
+  public static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";//聚类距离相差多少后,就不在聚类了
   
   public static final String DISTANCE_MEASURE_OPTION = "distanceMeasure";
   
@@ -39,13 +39,13 @@ public final class DefaultOptionCreator {
   
   public static final String INPUT_OPTION = "input";
   
-  public static final String MAX_ITERATIONS_OPTION = "maxIter";
+  public static final String MAX_ITERATIONS_OPTION = "maxIter";//最大循环次数
   
   public static final String MAX_REDUCERS_OPTION = "maxRed";
   
   public static final String METHOD_OPTION = "method";
   
-  public static final String NUM_CLUSTERS_OPTION = "numClusters";
+  public static final String NUM_CLUSTERS_OPTION = "numClusters";//聚类的数量,即k
   
   public static final String OUTPUT_OPTION = "output";
   
@@ -240,6 +240,7 @@ public final class DefaultOptionCreator {
   
   /**
  * @return a DefaultOptionBuilder for the clusterFilter option
+ * 该值用于减少噪音数据,因为噪音数据是少量的数据组成的一类,这样避免噪音数据单独成为一类
  */
   public static DefaultOptionBuilder clusterFilterOption() {
     return new DefaultOptionBuilder()

@@ -37,6 +37,7 @@ public final class CanopyConfigKeys {
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
 
+  //该值用于减少噪音数据,因为噪音数据是少量的数据组成的一类,这样避免噪音数据单独成为一类
   public static final String CF_KEY = "org.apache.mahout.clustering.canopy.canopyFilter";//CanopyDriver中默认值是0,即有1个点就可以认为是一个聚类点
 
   /**

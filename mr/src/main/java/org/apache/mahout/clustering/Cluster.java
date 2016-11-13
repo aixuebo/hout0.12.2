@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Implementations of this interface have a printable representation and certain
  * attributes that are common across all clustering implementations
- * 
+ * 该类代表一个聚类
  */
 public interface Cluster extends Model<VectorWritable>, Parametered {
 
@@ -89,6 +89,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
   /**
    * @return if the receiver has converged, or false if that has no meaning for
    *         the implementation
+   * 计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
    */
   boolean isConverged();
   

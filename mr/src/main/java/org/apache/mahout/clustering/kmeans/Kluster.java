@@ -24,9 +24,12 @@ import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
+//表示聚类的一个分类,即中心点等信息组成
 public class Kluster extends DistanceMeasureCluster {
   
-  /** Has the centroid converged with the center? */
+  /** Has the centroid converged with the center?
+   * 计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
+   **/
   private boolean converged;
   
   /** For (de)serialization as a Writable */
@@ -65,7 +68,7 @@ public class Kluster extends DistanceMeasureCluster {
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    out.writeBoolean(converged);
+    out.writeBoolean(converged);//计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
   }
   
   @Override
@@ -94,7 +97,8 @@ public class Kluster extends DistanceMeasureCluster {
    * @return if the cluster is converged
    */
   public boolean computeConvergence(DistanceMeasure measure, double convergenceDelta) {
-    Vector centroid = computeCentroid();
+    Vector centroid = computeCentroid();//计算该聚类中所有点的平均值
+    //计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
     converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
@@ -107,7 +111,8 @@ public class Kluster extends DistanceMeasureCluster {
   protected void setConverged(boolean converged) {
     this.converged = converged;
   }
-  
+
+  //计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
   public boolean calculateConvergence(double convergenceDelta) {
     Vector centroid = computeCentroid();
     converged = getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
