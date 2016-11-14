@@ -59,7 +59,7 @@ public final class DefaultOptionCreator {
   
   public static final String T4_OPTION = "t4";
   
-  public static final String OUTLIER_THRESHOLD = "outlierThreshold";
+  public static final String OUTLIER_THRESHOLD = "outlierThreshold";//判断概率的最大值是否大于一个伐值,如果大于该伐值,说明可以是存在一个分类中
   
   public static final String CLUSTER_FILTER_OPTION = "clusterFilter";
   

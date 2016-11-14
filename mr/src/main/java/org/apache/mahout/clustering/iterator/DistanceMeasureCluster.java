@@ -64,6 +64,19 @@ public class DistanceMeasureCluster extends AbstractCluster {
     super.write(out);
   }
 
+  /**
+   * 返回该元素属于该模型的概率
+   * 因为该类DistanceMeasureCluster本身就表示一个分类,因此该方法表示参数向量 属于 本类这个分类的可能性
+   * 既然是可能性,那么就是一个概率,属于0-1之间的概率
+   * 
+   * 那么怎么转换成概率呢,
+   * 已知是 两个向量之间的距离越大,说明越不是一个分类
+   * 
+   * 如果我们用1/距离,因此距离越大,说明值越小,这样就说明概率越小,但是分母距离又不能为0,因此分母用1+距离,刨除0带来的隐患。
+   * 而且由于距离还可能是0-1之间分数,因此1/0.5 就变成大于100%的概率了,也不对,因此分母用1+距离也可以保证一定分母是大于1的整数,得到的概率一定是0-1之间,这样就非常完美了
+   * 
+   * 至于分母用1+距离,那么我用2+距离可以吗？答案是完全可以的
+   */
   @Override
   public double pdf(VectorWritable vw) {
     return 1 / (1 + measure.distance(vw.get(), getCenter()));

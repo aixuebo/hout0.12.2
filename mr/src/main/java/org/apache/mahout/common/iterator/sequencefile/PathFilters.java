@@ -35,6 +35,7 @@ public final class PathFilters {
   
   /**
    * Pathfilter to read the final clustering file.
+   * 读取clusters-xxx-final文件
    */
   private static final PathFilter CLUSTER_FINAL = new PathFilter() {
     @Override
@@ -65,6 +66,7 @@ public final class PathFilters {
   
   /**
    * @return {@link PathFilter} that accepts paths whose file name starts with "part-" and ends with "-final".
+   * 读取clusters-xxx-final文件
    */
   public static PathFilter finalPartFilter() {
     return CLUSTER_FINAL;

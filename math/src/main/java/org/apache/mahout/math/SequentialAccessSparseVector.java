@@ -39,10 +39,15 @@ import org.apache.mahout.math.function.Functions;
  * </ul>
  *
  * See {@link OrderedIntDoubleMapping}
+ * 该类实现了一个向量,仅仅用于存储向量中非0的元素,即该向量属于松散向量
+ * 
+ * SequentialAccessSparseVector:实现为整形 (int) 类型和浮点数 (double) 类型的并行数组，它也只存储向量中不为空的值，但只提供顺序访问。
+ * RandomAccessSparseVector:基于浮点数的 HashMap 实现的，key 是整形 (int) 类型，value 是浮点数 (double) 类型，它只存储向量中不为空的值，并提供随机访问。 
+ * DenseVector:密集类型的向量,即用一个数组将向量里面的所有元素都记录
  */
 public class SequentialAccessSparseVector extends AbstractVector {
 
-  private OrderedIntDoubleMapping values;
+  private OrderedIntDoubleMapping values;//用于存储非0的数组,并且是按照下标从小到大的顺序的方式写入数据
 
   /** For serialization purposes only. */
   public SequentialAccessSparseVector() {

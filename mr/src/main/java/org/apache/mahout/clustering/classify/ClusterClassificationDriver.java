@@ -58,6 +58,11 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * Classifies the vectors into different clusters found by the clustering
  * algorithm.
+ * 这个driver最终的意义是计算,而不是真正的聚类
+ * 输入源:输入目录、分类中心点集合、输出目录等等
+ * 输出:每一个点所属分类clusterId,以及WeightedPropertyVectorWritable对象,
+ * 该WeightedPropertyVectorWritable对象包含了该点具体向量、该点属于该分类的概率(权重),该点与该分类的真实距离。
+ * 注意:此时是没有reduce操作的,因此可以点可以属于多个分类
  */
 public final class ClusterClassificationDriver extends AbstractJob {
   
@@ -69,7 +74,9 @@ public final class ClusterClassificationDriver extends AbstractJob {
     
     addInputOption();
     addOutputOption();
-    addOption(DefaultOptionCreator.methodOption().create());
+    addOption(DefaultOptionCreator.methodOption().create());//本地运行还是mr运行
+    
+    //中心节点位置
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.")
         .create());//clusters,必须是SequenceFile序列化文件
@@ -84,7 +91,9 @@ public final class ClusterClassificationDriver extends AbstractJob {
     if (getConf() == null) {
       setConf(new Configuration());
     }
+    
     Path clustersIn = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));//clusters
+    
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);//运行方式,是本地还是集群上运行
     

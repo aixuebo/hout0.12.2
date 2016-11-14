@@ -31,9 +31,9 @@ public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
 
   @Override
   public Vector select(Vector probabilities) {
-    int maxValueIndex = probabilities.maxValueIndex();
-    Vector weights = new SequentialAccessSparseVector(probabilities.size());
-    weights.set(maxValueIndex, 1.0);
+    int maxValueIndex = probabilities.maxValueIndex();//最大概率分数的下标
+    Vector weights = new SequentialAccessSparseVector(probabilities.size());//创新一个新的向量,是疏松向量,只有值的下标才会在该向量里面存储值,此时是空的
+    weights.set(maxValueIndex, 1.0);//向该疏松向量添加值,仅添加了一个值,表示哪个下标位置的概率为1
     return weights;
   }
 

@@ -20,10 +20,14 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
+/**
+ * 提供一个对向量的描述信息,其中该类是向量的代理类
+ * 例如 new NamedVector(new DenseVector(new double[] {0.2, 650, 3}),"Large oval red apple");表示有一个苹果,并且是红色的大苹果,因此后面的字符串就是向量的描述 
+ */
 public class NamedVector implements Vector {
 
-  private Vector delegate;
-  private String name;
+  private Vector delegate;//代理的向量
+  private String name;//对向量的描述信息
 
   public NamedVector() {
   }

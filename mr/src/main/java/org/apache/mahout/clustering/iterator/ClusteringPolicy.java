@@ -35,15 +35,17 @@ public interface ClusteringPolicy extends Writable {
    *          a prior ClusterClassifier
    * @return a Vector of probabilities that the data is described by each of the
    *         models
+   *  属于属于哪个分类的概率,返回的向量是概率向量,即如果有5个分类,则返回的向量就是5个值,表示属于每一个分类的概率        
    */
   Vector classify(Vector data, ClusterClassifier prior);
   
   /**
    * Return a vector of weights for each of the models given those probabilities
-   * 
+   * 参数是classify方法返回值,即一个元素在各个分类上的概率
    * @param probabilities
    *          a Vector of pdfs
    * @return a Vector of weights
+   * 返回值是该向量真的属于哪些分类,非0的元素都是要属于的分类,具体值就是属于该分类的权重
    */
   Vector select(Vector probabilities);
   
@@ -51,7 +53,8 @@ public interface ClusteringPolicy extends Writable {
    * Update the policy with the given classifier
    * 
    * @param posterior
-   *          a ClusterClassifier
+   *          a ClusterClassifier、
+   * 更新一个代理对象         
    */
   void update(ClusterClassifier posterior);
   
@@ -60,6 +63,7 @@ public interface ClusteringPolicy extends Writable {
    * 
    * @param posterior
    *          a posterior ClusterClassifier
+   * 重新计算每一个分类的中心值
    */
   void close(ClusterClassifier posterior);
   

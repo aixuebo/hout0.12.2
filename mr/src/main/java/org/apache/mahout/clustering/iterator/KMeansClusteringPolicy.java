@@ -49,16 +49,16 @@ public class KMeansClusteringPolicy extends AbstractClusteringPolicy {
     this.convergenceDelta = in.readDouble();
   }
   
+  //关闭前重新计算中心点
   @Override
   public void close(ClusterClassifier posterior) {
-    boolean allConverged = true;
+    boolean allConverged = true;//true表示有一个分类已经达到伐值了,两次迭代没什么区别了
     for (Cluster cluster : posterior.getModels()) {
       org.apache.mahout.clustering.kmeans.Kluster kluster = (org.apache.mahout.clustering.kmeans.Kluster) cluster;
-      boolean converged = kluster.calculateConvergence(convergenceDelta);
+      boolean converged = kluster.calculateConvergence(convergenceDelta);//true表示有一个分类已经达到伐值了,两次迭代没什么区别了
       allConverged = allConverged && converged;
-      cluster.computeParameters();
+      cluster.computeParameters();//关闭前重新计算中心点
     }
-    
   }
   
 }

@@ -24,7 +24,9 @@ import java.util.NoSuchElementException;
 import com.google.common.base.Preconditions;
 
 /** Implements vector as an array of doubles 
- * 密集向量 
+ * DenseVector:密集类型的向量,即用一个数组将向量里面的所有元素都记录
+ * RandomAccessSparseVector:基于浮点数的 HashMap 实现的，key 是整形 (int) 类型，value 是浮点数 (double) 类型，它只存储向量中不为空的值，并提供随机访问。
+ * SequentialAccessSparseVector：实现为整形 (int) 类型和浮点数 (double) 类型的并行数组，它也只存储向量中不为空的值，但只提供顺序访问。
  **/
 public class DenseVector extends AbstractVector {
 

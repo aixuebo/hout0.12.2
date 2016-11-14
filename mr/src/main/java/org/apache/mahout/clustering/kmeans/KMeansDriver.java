@@ -103,7 +103,7 @@ public class KMeansDriver extends AbstractJob {
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
 
     //聚类的数量,即k
-    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {//-k参数存在
       int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
 
       Long seed = null;
@@ -130,22 +130,22 @@ public class KMeansDriver extends AbstractJob {
    * cluster the input vectors.
    *
    * @param input
-   *          the directory pathname for input points
+   *          the directory pathname for input points 所有输入源
    * @param clustersIn
-   *          the directory pathname for initial & computed clusters
+   *          the directory pathname for initial & computed clusters 中心点所在路径,有几个分类,就是几个中心点
    * @param output
-   *          the directory pathname for output points
+   *          the directory pathname for output points 输出目录
    * @param convergenceDelta
-   *          the convergence delta value
+   *          the convergence delta value 小于该伐值的数据就不需要在聚类了
    * @param maxIterations
-   *          the maximum number of iterations
+   *          the maximum number of iterations 最大迭代次数
    * @param runClustering
    *          true if points are to be clustered after iterations are completed
    * @param clusterClassificationThreshold
    *          Is a clustering strictness / outlier removal parameter. Its value should be between 0 and 1. Vectors
    *          having pdf below this value will not be clustered.
    * @param runSequential
-   *          if true execute sequential algorithm
+   *          if true execute sequential algorithm 是mr算法还是本地算法
    */
   public static void run(Configuration conf, Path input, Path clustersIn, Path output,
     double convergenceDelta, int maxIterations, boolean runClustering, double clusterClassificationThreshold,
@@ -219,17 +219,18 @@ public class KMeansDriver extends AbstractJob {
     InterruptedException, ClassNotFoundException {
     
     double convergenceDelta = Double.parseDouble(delta);
+    //读取聚类中心点信息,返回聚类对象集合,该集合就是中心点所在集合
     List<Cluster> clusters = new ArrayList<>();
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
-    if (clusters.isEmpty()) {
+    if (clusters.isEmpty()) {//说明没有中心点,因此抛异常
       throw new IllegalStateException("No input clusters found in " + clustersIn + ". Check your -c argument.");
     }
     
-    Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-    ClusteringPolicy policy = new KMeansClusteringPolicy(convergenceDelta);
-    ClusterClassifier prior = new ClusterClassifier(clusters, policy);
-    prior.writeToSeqFiles(priorClustersPath);
+    Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);//output/clusters-0
+    ClusteringPolicy policy = new KMeansClusteringPolicy(convergenceDelta);//kmeans计算距离相似度概率代理类
+    ClusterClassifier prior = new ClusterClassifier(clusters, policy);//真正集群计算相似度类,依赖不同的计算规则,因此有代理
+    prior.writeToSeqFiles(priorClustersPath);//将中心节点以及代理类信息写入到hdfs上
     
     if (runSequential) {
       ClusterIterator.iterateSeq(conf, input, priorClustersPath, output, maxIterations);

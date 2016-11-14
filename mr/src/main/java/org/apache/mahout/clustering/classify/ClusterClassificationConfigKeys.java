@@ -22,11 +22,12 @@ package org.apache.mahout.clustering.classify;
  */
 public final class ClusterClassificationConfigKeys {
   
-  public static final String CLUSTERS_IN = "clusters_in";
+  public static final String CLUSTERS_IN = "clusters_in";//分类中心路径
   
-  public static final String OUTLIER_REMOVAL_THRESHOLD = "pdf_threshold";
+  //设置该伐值,一个点和多个分类都很相近,因此该点在每一个分类的打分都不会太高,因此就会小于该伐值,就不会要这个点了
+  public static final String OUTLIER_REMOVAL_THRESHOLD = "pdf_threshold";//判断概率的最大值是否大于一个伐值,如果大于该伐值,说明可以是存在一个分类中
   
-  public static final String EMIT_MOST_LIKELY = "emit_most_likely";
+  public static final String EMIT_MOST_LIKELY = "emit_most_likely";//true表示一个点必须只能属于一个分类,false表示一个点可以属于多个分类
 
   private ClusterClassificationConfigKeys() {
   }

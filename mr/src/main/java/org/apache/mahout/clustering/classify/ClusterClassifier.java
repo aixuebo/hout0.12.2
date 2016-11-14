@@ -60,22 +60,24 @@ import org.apache.mahout.math.VectorWritable;
  * single POLICY_FILE_NAME file in the clustersOut directory and the models are
  * written to one or more part-n files so that multiple reducers may employed to
  * produce them.
+ * 该类属于模版方法,定义了一套计算模板,但是具体计算算法,给ClusteringPolicy类去实现
  */
 public class ClusterClassifier extends AbstractVectorClassifier implements OnlineLearner, Writable {
 
-  private static final String POLICY_FILE_NAME = "_policy";
+  private static final String POLICY_FILE_NAME = "_policy";//读取clusterOutputPath下clusters-xxx-final/_policy文件,只是是哪个代理类
 
-  private List<Cluster> models;
+  private List<Cluster> models;//聚类的中心集合
 
-  private String modelClass;
+  private String modelClass;//models的Cluster是哪个实现类
 
-  private ClusteringPolicy policy;
+  private ClusteringPolicy policy;//真正计算概率的类
 
   /**
    * The public constructor accepts a list of clusters to become the models
    *
    * @param models a List<Cluster>
    * @param policy a ClusteringPolicy
+   * 真正集群计算相似度类,依赖不同的计算规则,因此有代理
    */
   public ClusterClassifier(List<Cluster> models, ClusteringPolicy policy) {
     this.models = models;
@@ -92,6 +94,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     this.policy = policy;
   }
 
+  //通过代理对象去计算参数点到所有分类的概率
   @Override
   public Vector classify(Vector instance) {
     return policy.classify(instance, this);
@@ -137,6 +140,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     }
   }
 
+  //训练,让某一个分类加入该点instance
   @Override
   public void train(int actual, Vector instance) {
     models.get(actual).observe(new VectorWritable(instance));
@@ -148,6 +152,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
    * @param actual the int index of a model
    * @param data   a data Vector
    * @param weight a double weighting factor
+   * 该元素 属于第几个分类 、该元素向量原值、该元素对该分类的打分
    */
   public void train(int actual, Vector data, double weight) {
     models.get(actual).observe(new VectorWritable(data), weight);
@@ -177,10 +182,11 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
 
   public void writeToSeqFiles(Path path) throws IOException {
-    writePolicy(policy, path);
+    writePolicy(policy, path);//向clusterOutputPath下clusters-xxx-final/_policy文件,写入是哪个代理类
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(path.toUri(), config);
     ClusterWritable cw = new ClusterWritable();
+    //输出分类中心内容到该目录下
     for (int i = 0; i < models.size(); i++) {
       try (SequenceFile.Writer writer = new SequenceFile.Writer(fs, config,
           new Path(path, "part-" + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class,
@@ -204,9 +210,10 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     }
     this.models = clusters;
     modelClass = models.get(0).getClass().getName();
-    this.policy = readPolicy(path);
+    this.policy = readPolicy(path);//读取clusterOutputPath下clusters-xxx-final/_policy文件,只是是哪个代理类
   }
 
+  //读取clusterOutputPath下clusters-xxx-final/_policy文件,只是是哪个代理类
   public static ClusteringPolicy readPolicy(Path path) throws IOException {
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
@@ -219,6 +226,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     return cpw.getValue();
   }
 
+  //向clusterOutputPath下clusters-xxx-final/_policy文件,写入是哪个代理类
   public static void writePolicy(ClusteringPolicy policy, Path path) throws IOException {
     Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();

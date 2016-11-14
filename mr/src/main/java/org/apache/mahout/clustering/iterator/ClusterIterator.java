@@ -47,7 +47,7 @@ import com.google.common.io.Closeables;
  */
 public final class ClusterIterator {
   
-  public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
+  public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";//存放每一轮迭代的时候中心节点存储的路径
 
   private ClusterIterator() {
   }
@@ -63,6 +63,7 @@ public final class ClusterIterator {
    *          the int number of iterations to perform
    * 
    * @return the posterior ClusterClassifier
+   * 用于测试环境
    */
   public static ClusterClassifier iterate(Iterable<Vector> data, ClusterClassifier classifier, int numIterations) {
     ClusteringPolicy policy = classifier.getPolicy();
@@ -157,8 +158,8 @@ public final class ClusterIterator {
     throws IOException, InterruptedException, ClassNotFoundException {
     ClusteringPolicy policy = ClusterClassifier.readPolicy(priorPath);
     Path clustersOut = null;
-    int iteration = 1;
-    while (iteration <= numIterations) {
+    int iteration = 1;//当前循环次数
+    while (iteration <= numIterations) {//循环N次
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
       String jobName = "Cluster Iterator running iteration " + iteration + " over priorPath: " + priorPath;
@@ -174,23 +175,26 @@ public final class ClusterIterator {
       job.setReducerClass(CIReducer.class);
       
       FileInputFormat.addInputPath(job, inPath);
-      clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);
-      priorPath = clustersOut;
+      //outPath/clusters-N
+      clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);//每次迭代次数不一样.目录就不一样
+      priorPath = clustersOut;//切换输出目录
       FileOutputFormat.setOutputPath(job, clustersOut);
       
       job.setJarByClass(ClusterIterator.class);
       if (!job.waitForCompletion(true)) {
         throw new InterruptedException("Cluster Iteration " + iteration + " failed processing " + priorPath);
       }
-      ClusterClassifier.writePolicy(policy, clustersOut);
+      ClusterClassifier.writePolicy(policy, clustersOut);//设置中心
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       iteration++;
-      if (isConverged(clustersOut, conf, fs)) {
+      if (isConverged(clustersOut, conf, fs)) {//达到伐值了,则不再进行迭代了
         break;
       }
     }
+    
+    //outPath/clusters-N-final
     Path finalClustersIn = new Path(outPath, Cluster.CLUSTERS_DIR + (iteration - 1) + Cluster.FINAL_ITERATION_SUFFIX);
-    FileSystem.get(clustersOut.toUri(), conf).rename(clustersOut, finalClustersIn);
+    FileSystem.get(clustersOut.toUri(), conf).rename(clustersOut, finalClustersIn);//将最后一次循环的结果集,改名为outPath/clusters-N-final
   }
   
   /**
@@ -201,6 +205,7 @@ public final class ClusterIterator {
    * @return true if all Clusters are converged
    * @throws IOException
    *           if there was an IO error
+   * 判断是否达到伐值了,true表示不用再迭代了          
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
@@ -208,7 +213,7 @@ public final class ClusterIterator {
           part.getPath(), true, conf);
       while (iterator.hasNext()) {
         ClusterWritable value = iterator.next();
-        if (!value.getValue().isConverged()) {
+        if (!value.getValue().isConverged()) {//必须全部达到伐值,才最终不会被迭代
           Closeables.close(iterator, true);
           return false;
         }

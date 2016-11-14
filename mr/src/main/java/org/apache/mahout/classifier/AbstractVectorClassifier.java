@@ -56,16 +56,20 @@ public abstract class AbstractVectorClassifier {
 
   /**
    * Compute and return a vector containing {@code n-1} scores, where
-   * {@code n} is equal to {@code numCategories()}, given an input
-   * vector {@code instance}. Higher scores indicate that the input vector
-   * is more likely to belong to that category. The categories are denoted by
-   * the integers {@code 0} through {@code n-1} (inclusive), and the
-   * scores in the returned vector correspond to categories 1 through
-   * {@code n-1} (leaving out category 0). It is assumed that the score for
-   * category 0 is one minus the sum of the scores in the returned vector.
-   *
-   * @param instance  A feature vector to be classified.
-   * @return A vector of probabilities in 1 of {@code n-1} encoding.
+   * {@code n} is equal to {@code numCategories()}, 
+   * 计算和返回一个向量,该向量包含n-1个打分,往下看会发现第0个向量的打分被取消了,转换成1-sum
+   *  
+   * given an input vector {@code instance}. Higher scores indicate that the input vector is more likely to belong to that category.
+   * 给定一个向量输入源,最高分大表输入向量最符合该分类
+   * 
+   * The categories are denoted by the integers {@code 0} through {@code n-1} (inclusive), and the scores in the returned vector correspond to categories 1 through
+   * {@code n-1} (leaving out category 0). 
+   * It is assumed that the score for category 0 is one minus the sum of the scores in the returned vector.
+   * 这个分类是[0,n-1]之间的一个数字,并且返回的代表的分数的向量指代分类[1,n-1],没有分类0,
+   * 这是假设分类0的分数是 1 - 返回向量分数之和
+   * 
+   * @param instance  A feature vector to be classified.一个特征向量,要去被分配到哪个分类中
+   * @return A vector of probabilities in 1 of {@code n-1} encoding.返回一个概率向量,仅仅包含[1,n-1]个向量
    */
   public abstract Vector classify(Vector instance);
   
