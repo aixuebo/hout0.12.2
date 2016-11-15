@@ -20,6 +20,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import javax.management.RuntimeErrorException;
+
 import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -99,6 +101,13 @@ public class Kluster extends DistanceMeasureCluster {
   public boolean computeConvergence(DistanceMeasure measure, double convergenceDelta) {
     Vector centroid = computeCentroid();//计算该聚类中所有点的平均值
     //计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
+   /* StringBuffer sb = new StringBuffer();
+    sb.append("kluster arr:"+convergenceDelta);
+    sb.append("kluster recomputer centroid is :"+centroid.asFormatString());
+    sb.append("kluster centroid is :"+getCenter().asFormatString());
+    sb.append("distance:"+getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()));
+    System.out.println("kluster==="+sb.toString());*/
+    /**throw new RuntimeException(sb.toString());*/
     converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
@@ -115,6 +124,14 @@ public class Kluster extends DistanceMeasureCluster {
   //计算平均值与初始化的中心点距离 是否小于参数,如果小于给定参数,则返回true,说明已经不需要再聚类该分类了
   public boolean calculateConvergence(double convergenceDelta) {
     Vector centroid = computeCentroid();
+    StringBuffer sb = new StringBuffer();
+    sb.append("kluster arr:"+convergenceDelta);
+    sb.append("kluster recomputer centroid is :"+centroid.asFormatString());
+    sb.append("kluster centroid is :"+getCenter().asFormatString());
+    sb.append("distance:"+getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()));
+    System.out.println("kluster==="+sb.toString());
+    //kluster arr:5000.0kluster recomputer centroid is :{0:7486.5630081300815}kluster centroid is :{0:7486.5630081300815}distance:0.0
+    /**throw new RuntimeException(sb.toString());*/
     converged = getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }

@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.iterator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -61,11 +62,16 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-	  //TODO 好像有bug,这个mapper本身没有进行中心点重新计算过程
+	  /**
+	   * TODO 好像有bug,这个mapper本身没有进行中心点重新计算过程
+	   * 后来经过打入日志上线调试,发现此处没有bug,
+	   * clusters.get(index)获取的对象虽然没有经过computeParameters计算.但是里面包含的信息都被序列化了,比如s0 s1 s2这样可以到达reduce节点进行统一统计
+	   */
     List<Cluster> clusters = classifier.getModels();//获取所有的聚类组
     ClusterWritable cw = new ClusterWritable();
     for (int index = 0; index < clusters.size(); index++) {//循环每一个聚类
       cw.setValue(clusters.get(index));//设置第几个聚类
+      System.out.println("after end ==="+index+"=="+cw.getValue().getCenter().asFormatString());
       context.write(new IntWritable(index), cw);
     }
     super.cleanup(context);

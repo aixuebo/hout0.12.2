@@ -84,12 +84,14 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
   @Override
   public String toString() {
     Vector vector = getVector();
-    StringBuilder bldr = new StringBuilder("wt: ").append(getWeight()).append(' ');
+    StringBuilder bldr = new StringBuilder("wt: ").append(getWeight()).append(' ');//打印该点到中心点的打分,即概率
+    //打印附加的属性信息,比如该点到中心点的真实距离
     if (properties != null && !properties.isEmpty()) {
       for (Map.Entry<Text, Text> entry : properties.entrySet()) {
         bldr.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString()).append(' ');
       }
     }
+    //打印该向量点的具体内容
     bldr.append(" vec: ").append(vector == null ? "null" : AbstractCluster.formatVector(vector, null));
     return bldr.toString();
   }

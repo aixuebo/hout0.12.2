@@ -29,7 +29,7 @@ public interface ClusterWriter extends Closeable {
 
   /**
    * Write all values in the Iterable to the output
-   *
+   * 写入所有的中心点对象到输出中,以此迭代循环写入
    * @param iterable The {@link Iterable} to loop over
    * @return the number of docs written
    * @throws java.io.IOException if there was a problem writing
@@ -38,15 +38,16 @@ public interface ClusterWriter extends Closeable {
 
   /**
    * Write out a Cluster
+   * 只写入一个中心点到输出中
    */
   void write(ClusterWritable clusterWritable) throws IOException;
 
   /**
    * Write the first {@code maxDocs} to the output.
-   *
+   * 写入中心点集合到输出中,最多写入多少个中心点
    * @param iterable The {@link Iterable} to loop over
-   * @param maxDocs  the maximum number of docs to write
-   * @return The number of docs written
+   * @param maxDocs  the maximum number of docs to write 最多写入多少个中心点
+   * @return The number of docs written 返回多少个docs被写入
    * @throws IOException if there was a problem writing
    */
   long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException;

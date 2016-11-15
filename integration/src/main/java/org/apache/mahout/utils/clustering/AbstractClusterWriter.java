@@ -71,6 +71,29 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
     return clusterIdToPoints;
   }
 
+  //写入全部点集合
+  @Override
+  public long write(Iterable<ClusterWritable> iterable) throws IOException {
+    return write(iterable, Long.MAX_VALUE);
+  }
+
+  @Override
+  public void close() throws IOException {
+    writer.close();
+  }
+
+  //最多写多少个点,达到这个数量就停止,或者循环集合<maxDocs
+  @Override
+  public long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException {
+    long result = 0;
+    Iterator<ClusterWritable> iterator = iterable.iterator();
+    while (result < maxDocs && iterator.hasNext()) {//最多写多少个点,达到这个数量就停止,或者循环集合<maxDocs
+      write(iterator.next());
+      result++;
+    }
+    return result;
+  }
+  
   public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
     StringBuilder sb = new StringBuilder(100);
@@ -95,27 +118,6 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
     }
     sb.deleteCharAt(sb.length() - 1);
     return sb.toString();
-  }
-
-  @Override
-  public long write(Iterable<ClusterWritable> iterable) throws IOException {
-    return write(iterable, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void close() throws IOException {
-    writer.close();
-  }
-
-  @Override
-  public long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException {
-    long result = 0;
-    Iterator<ClusterWritable> iterator = iterable.iterator();
-    while (result < maxDocs && iterator.hasNext()) {
-      write(iterator.next());
-      result++;
-    }
-    return result;
   }
 
   private static Collection<Pair<String, Double>> getTopPairs(Vector vector, String[] dictionary, int numTerms) {

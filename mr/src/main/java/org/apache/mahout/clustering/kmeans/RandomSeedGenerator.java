@@ -143,5 +143,16 @@ public final class RandomSeedGenerator {
     
     return outFile;
   }
+  
+  public static void main(String[] args) {
+	System.out.println("aaa");
+	
+	Random random = RandomUtils.getRandom();
+	
+	System.out.println("===>"+random);
+	for(int i=2;i<100;i++){
+		System.out.println(random.nextInt(i));
+	}
+  }
 
 }

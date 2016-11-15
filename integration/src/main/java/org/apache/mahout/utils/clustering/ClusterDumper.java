@@ -72,19 +72,19 @@ public final class ClusterDumper extends AbstractJob {
   public static final String SUBSTRING_OPTION = "substring";
   public static final String EVALUATE_CLUSTERS = "evaluate";
 
-  public static final String OUTPUT_FORMAT_OPT = "outputFormat";
+  public static final String OUTPUT_FORMAT_OPT = "outputFormat";//默认是TEXT,还可以是CSV  GRAPH_ML  JSON
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
-  private Path seqFileDir;
-  private Path pointsDir;
-  private long maxPointsPerCluster = Long.MAX_VALUE;
-  private String termDictionary;
-  private String dictionaryFormat;
-  private int subString = Integer.MAX_VALUE;
-  private int numTopFeatures = 10;
+  private Path seqFileDir;//输入源路径
+  private Path pointsDir;//--pointsDir -p
+  private long maxPointsPerCluster = Long.MAX_VALUE;//--samplePoints -sp
+  private String termDictionary;//--dictionary -d
+  private String dictionaryFormat;//--dictionaryType -dt
+  private int subString = Integer.MAX_VALUE;//--substring -b
+  private int numTopFeatures = 10;//--numWords -n
   private Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints;
-  private OUTPUT_FORMAT outputFormat = OUTPUT_FORMAT.TEXT;
-  private boolean runEvaluation;
+  private OUTPUT_FORMAT outputFormat = OUTPUT_FORMAT.TEXT;//--outputFormat -of (TEXT  CSV  GRAPH_ML  JSON)
+  private boolean runEvaluation;//--evaluate -e
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) {
     this.seqFileDir = seqFileDir;
@@ -100,12 +100,23 @@ public final class ClusterDumper extends AbstractJob {
     new ClusterDumper().run(args);
   }
 
+  /**
+   * --outputFormat -of (TEXT  CSV  GRAPH_ML  JSON)
+   * --substring -b
+   * --numWords -n
+   * --pointsDir -p
+   * --samplePoints -sp
+   * --dictionary -d
+   * --dictionaryType -dt
+   * --evaluate -e
+   * --distanceMeasure -dm 度量距离的实现类
+   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
     addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format for the results.  Options: TEXT, CSV, JSON or GRAPH_ML",
-        "TEXT");
+        "TEXT");//输出格式
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
     addOption(POINTS_DIR_OPTION, "p",
@@ -117,38 +128,48 @@ public final class ClusterDumper extends AbstractJob {
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
     addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  "
         + "The output will be appended to the rest of the output at the end.", false, false, null));
-    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());//--distanceMeasure -dm 度量距离的实现类
 
     // output is optional, will print to System.out per default
     if (parseArguments(args, false, true) == null) {
       return -1;
     }
 
-    seqFileDir = getInputPath();
-    if (hasOption(POINTS_DIR_OPTION)) {
+    seqFileDir = getInputPath();//输入源
+    
+    if (hasOption(POINTS_DIR_OPTION)) {//--pointsDir -p
       pointsDir = new Path(getOption(POINTS_DIR_OPTION));
     }
-    outputFile = getOutputFile();
-    if (hasOption(SUBSTRING_OPTION)) {
+    outputFile = getOutputFile();//输出目录
+    
+    if (hasOption(SUBSTRING_OPTION)) {//--substring -b
       int sub = Integer.parseInt(getOption(SUBSTRING_OPTION));
       if (sub >= 0) {
         subString = sub;
       }
     }
-    termDictionary = getOption(DICTIONARY_OPTION);
-    dictionaryFormat = getOption(DICTIONARY_TYPE_OPTION);
-    if (hasOption(NUM_WORDS_OPTION)) {
+    
+    
+    termDictionary = getOption(DICTIONARY_OPTION);//--dictionary -d
+    dictionaryFormat = getOption(DICTIONARY_TYPE_OPTION);//--dictionaryType -dt
+    
+    if (hasOption(NUM_WORDS_OPTION)) {//--numWords -n
       numTopFeatures = Integer.parseInt(getOption(NUM_WORDS_OPTION));
     }
-    if (hasOption(OUTPUT_FORMAT_OPT)) {
+    
+    if (hasOption(OUTPUT_FORMAT_OPT)) {//--outputFormat -of (TEXT  CSV  GRAPH_ML  JSON)
       outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
-    if (hasOption(SAMPLE_POINTS)) {
+    
+    if (hasOption(SAMPLE_POINTS)) {//--samplePoints -sp
       maxPointsPerCluster = Long.parseLong(getOption(SAMPLE_POINTS));
     } else {
       maxPointsPerCluster = Long.MAX_VALUE;
     }
-    runEvaluation = hasOption(EVALUATE_CLUSTERS);
+    
+    runEvaluation = hasOption(EVALUATE_CLUSTERS);//--evaluate -e
+    
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
 
@@ -157,6 +178,16 @@ public final class ClusterDumper extends AbstractJob {
     return 0;
   }
 
+  private void init() {
+    if (this.pointsDir != null) {
+      Configuration conf = new Configuration();
+      // read in the points
+      clusterIdToPoints = readPoints(this.pointsDir, maxPointsPerCluster, conf);
+    } else {
+      clusterIdToPoints = Collections.emptyMap();
+    }
+  }
+  
   public void printClusters(String[] dictionary) throws Exception {
     Configuration conf = new Configuration();
 
@@ -226,9 +257,30 @@ public final class ClusterDumper extends AbstractJob {
     }
   }
 
+  public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir,
+          long maxPointsPerCluster,Configuration conf) {
+		Map<Integer, List<WeightedPropertyVectorWritable>> result = new TreeMap<>();
+		for (Pair<IntWritable, WeightedPropertyVectorWritable> record
+		: new SequenceFileDirIterable<IntWritable, WeightedPropertyVectorWritable>(pointsPathDir, PathType.LIST,
+		PathFilters.logsCRCFilter(), conf)) {
+		// value is the cluster id as an int, key is the name/id of the
+		// vector, but that doesn't matter because we only care about printing it
+		//String clusterId = value.toString();
+		int keyValue = record.getFirst().get();
+		List<WeightedPropertyVectorWritable> pointList = result.get(keyValue);
+		if (pointList == null) {
+		pointList = new ArrayList<>();
+		result.put(keyValue, pointList);
+		}
+		if (pointList.size() < maxPointsPerCluster) {
+		pointList.add(record.getSecond());
+		}
+		}
+		return result;
+  }
+  
   ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
     ClusterWriter result;
-
     switch (outputFormat) {
       case TEXT:
         result = new ClusterDumperWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
@@ -254,17 +306,6 @@ public final class ClusterDumper extends AbstractJob {
   public void setOutputFormat(OUTPUT_FORMAT of) {
     outputFormat = of;
   }
-
-  private void init() {
-    if (this.pointsDir != null) {
-      Configuration conf = new Configuration();
-      // read in the points
-      clusterIdToPoints = readPoints(this.pointsDir, maxPointsPerCluster, conf);
-    } else {
-      clusterIdToPoints = Collections.emptyMap();
-    }
-  }
-
 
   public int getSubString() {
     return subString;
@@ -301,28 +342,5 @@ public final class ClusterDumper extends AbstractJob {
 
   public void setMaxPointsPerCluster(long maxPointsPerCluster) {
     this.maxPointsPerCluster = maxPointsPerCluster;
-  }
-
-  public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir,
-                                                                              long maxPointsPerCluster,
-                                                                              Configuration conf) {
-    Map<Integer, List<WeightedPropertyVectorWritable>> result = new TreeMap<>();
-    for (Pair<IntWritable, WeightedPropertyVectorWritable> record
-        : new SequenceFileDirIterable<IntWritable, WeightedPropertyVectorWritable>(pointsPathDir, PathType.LIST,
-            PathFilters.logsCRCFilter(), conf)) {
-      // value is the cluster id as an int, key is the name/id of the
-      // vector, but that doesn't matter because we only care about printing it
-      //String clusterId = value.toString();
-      int keyValue = record.getFirst().get();
-      List<WeightedPropertyVectorWritable> pointList = result.get(keyValue);
-      if (pointList == null) {
-        pointList = new ArrayList<>();
-        result.put(keyValue, pointList);
-      }
-      if (pointList.size() < maxPointsPerCluster) {
-        pointList.add(record.getSecond());
-      }
-    }
-    return result;
   }
 }
