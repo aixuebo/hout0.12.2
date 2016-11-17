@@ -43,6 +43,7 @@ final class FuzzyKMeansUtil {
    *          the path to the prior Clusters
    * @param clusters
    *          a List<Cluster> to put values into
+   * 获取中心点集合,将中心点集合转换成 SoftCluster对象集合
    */
   public static void configureWithClusterInfo(Configuration conf, Path clusterPath, List<Cluster> clusters) {
     for (Writable value : new SequenceFileDirValueIterable<>(clusterPath, PathType.LIST,

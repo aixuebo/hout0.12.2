@@ -50,6 +50,7 @@ public class SoftCluster extends Kluster {
     return (isConverged() ? "SV-" : "SC-") + getId();
   }
   
+  //不支持pdf概率计算,使用其他方式计算,参见FuzzyKMeansClusteringPolicy类
   @Override
   public double pdf(VectorWritable vw) {
     // SoftCluster pdf cannot be calculated out of context. See

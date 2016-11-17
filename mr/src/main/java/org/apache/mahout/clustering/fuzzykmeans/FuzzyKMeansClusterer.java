@@ -23,26 +23,51 @@ import java.util.List;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
+/**
+ * 该类用于FuzzyKMeansClusteringPolicy类计算使用
+ */
 public class FuzzyKMeansClusterer {
 
-  private static final double MINIMAL_VALUE = 0.0000000001;
+  private static final double MINIMAL_VALUE = 0.0000000001;//最小概率
   
-  private double m = 2.0; // default value
+  private double m = 2.0; // default value 设置模糊因子,即-m对应的参数
   
+  /**
+   * 真正的计算
+   * @param clusters 中心点集合
+   * @param clusterDistanceList 该点与每一个中心点对应的距离集合
+   * @return
+   */
   public Vector computePi(Collection<SoftCluster> clusters, List<Double> clusterDistanceList) {
-    Vector pi = new DenseVector(clusters.size());
+    Vector pi = new DenseVector(clusters.size());//设置一个密集向量,size的长度就是中心点的大小
     for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      pi.set(i, probWeight);
+      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);//计算权重
+      pi.set(i, probWeight);//设置该点到每一个中心点的权重
     }
     return pi;
   }
   
-  /** Computes the probability of a point belonging to a cluster */
+  /**
+   * Computes the probability of a point belonging to a cluster
+   * 计算该点属于哪个分类的概率 
+   * @param clusterDistance 该点到某一个中心点的距离
+   * @param clusterDistanceList 该点到所有中心点的距离
+   * @return
+   */
   public double computeProbWeight(double clusterDistance, Iterable<Double> clusterDistanceList) {
-    if (clusterDistance == 0) {
+    if (clusterDistance == 0) {//如果该点到这个中心点的距离为0,说明非常接近了,因此概率就是设置为最小概率
       clusterDistance = MINIMAL_VALUE;
     }
+    
+    /**
+     * 分析公式
+     * Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
+     * 1.clusterDistance / eachCDist 表示当前点与该中心点的距离 与每一个其他中心点的距离做比较,该值越小,说明越接近,
+     * 比如该点到3个中心点的距离分别是 5 12 18
+     * 因此5/5 5/12 5/18 就是最终得知
+     * 2. 用1的结果*2.0 / (m - 1)次方,其中m就是因子
+     * 3.最后要1/denom,意思是取倒数,因为上述1和2的计算是距离越近,值越小,因此获取倒数后,就是概率越大的意思
+     */
     double denom = 0.0;
     for (double eachCDist : clusterDistanceList) {
       if (eachCDist == 0.0) {

@@ -41,6 +41,7 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//模糊kmeans聚类
 public class FuzzyKMeansDriver extends AbstractJob {
 
   public static final String M_OPTION = "m";
@@ -57,30 +58,35 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    
+    //中心点路径
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
             + "If k is also specified, then a random set of vectors will be selected"
             + " and written out to this path first")
         .create());
+    
+    //-k分成多少类
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
             + " as the Centroid and written to the clusters input path.").create());
-    addOption(DefaultOptionCreator.convergenceOption().create());
-    addOption(DefaultOptionCreator.maxIterationsOption().create());
-    addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
+    
+    addOption(DefaultOptionCreator.convergenceOption().create());//伐值
+    addOption(DefaultOptionCreator.maxIterationsOption().create());//最多循环次数
+    addOption(DefaultOptionCreator.overwriteOption().create());//是否删除原有输出目录
+    addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);//-m模糊因子,必须大于1
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
-    addOption(DefaultOptionCreator.useSetRandomSeedOption().create());
+    addOption(DefaultOptionCreator.useSetRandomSeedOption().create());//随机产生中心点的随机因子
 
     if (parseArguments(args) == null) {
       return -1;
     }
 
     Path input = getInputPath();
-    Path clusters = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));
+    Path clusters = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));//中心点路径
     Path output = getOutputPath();
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     if (measureClass == null) {
@@ -97,11 +103,11 @@ public class FuzzyKMeansDriver extends AbstractJob {
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
 
-    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {//说明设置了-k属性,去随机产生k个中心点
       int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
 
       Long seed = null;
-      if (hasOption(DefaultOptionCreator.RANDOM_SEED)) {
+      if (hasOption(DefaultOptionCreator.RANDOM_SEED)) {//随机因子
         seed = Long.parseLong(getOption(DefaultOptionCreator.RANDOM_SEED));
       }
 
@@ -265,25 +271,26 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                    boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
     
-    List<Cluster> clusters = new ArrayList<>();
-    FuzzyKMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
+    List<Cluster> clusters = new ArrayList<>();//中心点集合,用于存储SoftCluster集合
+    FuzzyKMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);//读取中心点集合,将其转换成SoftCluster对象集合
     
     if (conf == null) {
       conf = new Configuration();
     }
     
-    if (clusters.isEmpty()) {
+    if (clusters.isEmpty()) {//中心点不允许为空
       throw new IllegalStateException("No input clusters found in " + clustersIn + ". Check your -c argument.");
     }
     
+    //设置模糊kmeans的代理类
     Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);   
     ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(m, convergenceDelta);
     ClusterClassifier prior = new ClusterClassifier(clusters, policy);
-    prior.writeToSeqFiles(priorClustersPath);
+    prior.writeToSeqFiles(priorClustersPath);//将所有代理信息以及中心点写入到代理文件中
     
     if (runSequential) {
       ClusterIterator.iterateSeq(conf, input, priorClustersPath, output, maxIterations);
-    } else {
+    } else {//n次迭代
       ClusterIterator.iterateMR(conf, input, priorClustersPath, output, maxIterations);
     }
     return output;
