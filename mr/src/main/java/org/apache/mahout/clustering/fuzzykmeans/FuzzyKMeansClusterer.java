@@ -28,7 +28,7 @@ import org.apache.mahout.math.Vector;
  */
 public class FuzzyKMeansClusterer {
 
-  private static final double MINIMAL_VALUE = 0.0000000001;//最小概率
+  private static final double MINIMAL_VALUE = 0.0000000001;//最小概率,最后会获取倒数,因此就变成最大概率了
   
   private double m = 2.0; // default value 设置模糊因子,即-m对应的参数
   
