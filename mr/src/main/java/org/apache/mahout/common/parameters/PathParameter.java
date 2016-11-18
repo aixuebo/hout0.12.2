@@ -20,6 +20,7 @@ package org.apache.mahout.common.parameters;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
+//参数对应的值是一个Path对象
 public class PathParameter extends AbstractParameter<Path> {
   
   public PathParameter(String prefix, String name, Configuration jobConf, Path defaultValue, String description) {

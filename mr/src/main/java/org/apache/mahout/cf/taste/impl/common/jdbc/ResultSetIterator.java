@@ -28,11 +28,11 @@ import com.google.common.collect.Iterators;
 
 public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
 
-  private final Iterator<T> delegate;
-  private final EachRowIterator rowDelegate;
+  private final Iterator<T> delegate;//代理类,这个代理类,代理rowDelegate对象,即代理sql查询的结果集中每一条记录
+  private final EachRowIterator rowDelegate;//执行一个sql,返回一个迭代器,迭代每一条返回的记录
 
   protected ResultSetIterator(DataSource dataSource, String sqlQuery) throws SQLException {
-    this.rowDelegate = new EachRowIterator(dataSource, sqlQuery);
+    this.rowDelegate = new EachRowIterator(dataSource, sqlQuery);//执行一个sql,返回一个迭代器,迭代每一条返回的记录
     delegate = Iterators.transform(rowDelegate,
       new Function<ResultSet, T>() {
         @Override
@@ -51,8 +51,10 @@ public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
     return delegate;
   }
 
+  //如何解析ResultSet对象,将其返回一个T泛型对象
   protected abstract T parseElement(ResultSet resultSet) throws SQLException;
 
+  //跳过若干条记录
   public void skip(int n) {
     if (n >= 1) {
       try {

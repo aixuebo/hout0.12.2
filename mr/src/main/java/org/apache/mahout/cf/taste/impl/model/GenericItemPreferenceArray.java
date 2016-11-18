@@ -36,6 +36,10 @@ import org.apache.mahout.common.iterator.CountingIterator;
  * @see BooleanItemPreferenceArray
  * @see GenericUserPreferenceArray
  * @see GenericPreference
+ * 参见GenericUserPreferenceArray对象
+ * 
+ * 表示同一个itemid对应一组user和偏好度value集合
+ * 因此该对象就表示一个itemid下的userid和偏好度value集合
  */
 public final class GenericItemPreferenceArray implements PreferenceArray {
 
@@ -43,9 +47,9 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   private static final int VALUE = 2;
   private static final int VALUE_REVERSED = 3;
 
-  private final long[] ids;
-  private long id;
-  private final float[] values;
+  private long id;//itemId
+  private final long[] ids;//对应的一组userid
+  private final float[] values;//对应的一组偏好度值
 
   public GenericItemPreferenceArray(int size) {
     this.ids = new long[size];

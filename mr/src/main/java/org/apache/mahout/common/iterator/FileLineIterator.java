@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * consistent with how {@link BufferedReader} defines lines.
  * <p/>
  * This class will uncompress files that end in .zip or .gz accordingly, too.
+ * 如何一行一行的读取文件
  */
 public final class FileLineIterator extends AbstractIterator<String> implements SkippingIterator<String>, Closeable {
 
@@ -64,6 +65,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
    *
    * @throws java.io.FileNotFoundException if the file does not exist
    * @throws IOException                   if the file cannot be read
+   * 参数 skipFirstLine false表示不跳过首行
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
     this(file, Charsets.UTF_8, skipFirstLine);
@@ -89,16 +91,17 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
 
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine) throws IOException {
     reader = new BufferedReader(new InputStreamReader(is, encoding));
-    if (skipFirstLine) {
+    if (skipFirstLine) {//如果跳过首行,则先执行一行内容
       reader.readLine();
     }
   }
 
+  //根据文件类型,进行解压缩处理
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine, String filename)
     throws IOException {
     InputStream compressedInputStream;
 
-    if ("gz".equalsIgnoreCase(Files.getFileExtension(filename.toLowerCase()))) {
+    if ("gz".equalsIgnoreCase(Files.getFileExtension(filename.toLowerCase()))) {//获取后缀
       compressedInputStream = new GZIPInputStream(is);
     } else if ("zip".equalsIgnoreCase(Files.getFileExtension(filename.toLowerCase()))) {
       compressedInputStream = new ZipInputStream(is);
@@ -107,7 +110,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
     }
 
     reader = new BufferedReader(new InputStreamReader(compressedInputStream, encoding));
-    if (skipFirstLine) {
+    if (skipFirstLine) {//如果跳过首行,则先执行一行内容
       reader.readLine();
     }
   }
@@ -124,6 +127,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
     }
   }
 
+  //一次读取一行数据
   @Override
   protected String computeNext() {
     String line;
@@ -142,7 +146,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
 
 
   @Override
-  public void skip(int n) {
+  public void skip(int n) {//跳过n行数据
     try {
       for (int i = 0; i < n; i++) {
         if (reader.readLine() == null) {

@@ -21,9 +21,12 @@ import java.io.Serializable;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * 权重的情况下如何运算平均值
+ */
 public class WeightedRunningAverage implements RunningAverage, Serializable {
 
-  private double totalWeight;
+  private double totalWeight;//权重其实就是count,只是FullRunning的方式是每次count+1,这次是count+权重而已
   private double average;
 
   public WeightedRunningAverage() {

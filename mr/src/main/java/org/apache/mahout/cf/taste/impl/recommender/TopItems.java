@@ -173,17 +173,22 @@ public final class TopItems {
     return result;
   }
   
+  /**
+   * @param howMany 选择top多少
+   * @param allSimilarities user-user-相似度value总集合
+   * @return
+   */
   public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(
     int howMany, Iterator<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
     
     Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities
       = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
-    boolean full = false;
+    boolean full = false;//队列是否填满
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    while (allSimilarities.hasNext()) {
+    while (allSimilarities.hasNext()) {//循环每一个user-user-相似度value对象
       GenericUserSimilarity.UserUserSimilarity similarity = allSimilarities.next();
-      double value = similarity.getValue();
-      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
+      double value = similarity.getValue();//获取相似度
+      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {//该value比优先队列中最小的大,因此要加入到队列
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -205,6 +210,7 @@ public final class TopItems {
   }
   
   public interface Estimator<T> {
+	//预估
     double estimate(T thing) throws TasteException;
   }
   

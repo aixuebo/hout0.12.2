@@ -56,9 +56,9 @@ public final class MySQLJDBCIDMigrator extends AbstractJDBCIDMigrator {
   }
   
   public MySQLJDBCIDMigrator(DataSource dataSource,
-                             String mappingTable,
+                             String mappingTable,//表名字或者 加入left join ... on...等语法
                              String longIDColumn,
-                             String stringIDColumn) {
+                             String stringIDColumn) {//要查询哪些列
     super(dataSource,
           "SELECT " + stringIDColumn + " FROM " + mappingTable + " WHERE " + longIDColumn + "=?",
           "INSERT IGNORE INTO " + mappingTable + " (" + longIDColumn + ',' + stringIDColumn + ") VALUES (?,?)");

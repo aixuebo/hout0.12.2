@@ -21,6 +21,7 @@ package org.apache.mahout.cf.taste.impl.common;
  * Adds notion of iterating over {@code long} primitives in the style of an {@link java.util.Iterator} -- as
  * opposed to iterating over {@link Long}. Implementations of this interface however also implement
  * {@link java.util.Iterator} and {@link Iterable} over {@link Long} for convenience.
+ * 迭代long类型的元素,并且支持跳过若干个元素功能
  */
 public interface LongPrimitiveIterator extends SkippingIterator<Long> {
   
@@ -28,11 +29,13 @@ public interface LongPrimitiveIterator extends SkippingIterator<Long> {
    * @return next {@code long} in iteration
    * @throws java.util.NoSuchElementException
    *           if no more elements exist in the iteration
+   * 获取下一个long元素,但是指针变化
    */
   long nextLong();
   
   /**
    * @return next {@code long} in iteration without advancing iteration
+   * 获取下一个long类型的元素,但是指针不变化
    */
   long peek();
   

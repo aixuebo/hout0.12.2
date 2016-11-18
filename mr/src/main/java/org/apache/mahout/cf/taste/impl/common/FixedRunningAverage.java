@@ -25,6 +25,7 @@ import java.io.Serializable;
  * when an API needs to return {@link RunningAverage} but is not in a position to accept
  * updates to it.
  * </p>
+ * 计算平均值和count值,这个类表示平均值和count值是固定不变的,因此称作为Fix
  */
 public class FixedRunningAverage implements RunningAverage, Serializable {
 

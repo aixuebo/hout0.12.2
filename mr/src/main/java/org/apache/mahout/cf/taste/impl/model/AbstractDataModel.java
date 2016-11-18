@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
  */
 public abstract class AbstractDataModel implements DataModel {
 
+  //最大和最小喜爱程度
   private float maxPreference;
   private float minPreference;
 

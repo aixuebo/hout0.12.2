@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 /**
  * <p>
  * Implementations can retrieve a value for a given key.
+ * 实现通过key可以还原value的接口
  * </p>
  */
 public interface Retriever<K,V> {

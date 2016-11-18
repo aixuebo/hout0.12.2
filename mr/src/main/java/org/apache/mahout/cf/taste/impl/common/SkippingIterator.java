@@ -22,6 +22,7 @@ import java.util.Iterator;
 /**
  * Adds ability to skip ahead in an iterator, perhaps more efficiently than by calling {@link #next()}
  * repeatedly.
+ * 迭代器进行包装一层,支持跳过若干个元素功能
  */
 public interface SkippingIterator<V> extends Iterator<V> {
   

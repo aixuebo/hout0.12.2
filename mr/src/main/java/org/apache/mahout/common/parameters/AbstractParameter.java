@@ -25,17 +25,18 @@ import org.apache.hadoop.conf.Configuration;
 public abstract class AbstractParameter<T> implements Parameter<T> {
   
   private T value;
+  private final Class<T> type;
+  private final String defaultValue;//默认String类型的值
+  
   private final String prefix;
   private final String name;
   private final String description;
-  private final Class<T> type;
-  private final String defaultValue;
-
-  protected AbstractParameter(Class<T> type,
-                              String prefix,
+  
+  protected AbstractParameter(Class<T> type,//value对应的类型
+                              String prefix,//用prefix.name去jobConf中获取真正的value
                               String name,
                               Configuration jobConf,
-                              T defaultValue,
+                              T defaultValue,//value对应的实例
                               String description) {
     this.type = type;
     this.name = name;
@@ -98,16 +99,20 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
     return defaultValue;
   }
   
+  //获取泛型的value值
   @Override
   public T get() {
     return value;
   }
   
+  //设置泛型的value值
   @Override
   public void set(T value) {
     this.value = value;
   }
   
+  
+  //将value转换成String
   @Override
   public String toString() {
     if (value != null) {

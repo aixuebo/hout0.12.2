@@ -34,6 +34,7 @@ public interface UserSimilarity extends Refreshable {
    * <p>
    * Returns the degree of similarity, of two users, based on the their preferences.
    * </p>
+   * 返回两个用户的相似度
    * 
    * @param userID1 first user ID
    * @param userID2 second user ID

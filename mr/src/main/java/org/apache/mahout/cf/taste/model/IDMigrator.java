@@ -50,6 +50,7 @@ public interface IDMigrator extends Refreshable {
   /**
    * @return the top 8 bytes of the MD5 hash of the bytes of the given {@link String}'s UTF-8 encoding as a
    *         long.
+   * 将字符串转换成long类型
    */
   long toLongID(String stringID);
   
@@ -57,6 +58,7 @@ public interface IDMigrator extends Refreshable {
    * @return the string ID most recently associated with the given long ID, or null if doesn't exist
    * @throws TasteException
    *           if an error occurs while retrieving the mapping
+   * 反编译,将long转换成字符串
    */
   String toStringID(long longID) throws TasteException;
   

@@ -37,6 +37,9 @@ import org.slf4j.LoggerFactory;
  * This {@link DataModel} decorator class is useful in a situation where you wish to recommend to a user that
  * doesn't really exist yet in your actual {@link DataModel}. For example maybe you wish to recommend DVDs to
  * a user who has browsed a few titles on your DVD store site, but, the user is not yet registered.
+ * 
+ * 该类是DataModel类的装饰类,在你希望推荐给尚未真实存在的用户情况下很有用
+ * 比如:可能你希望推荐DVD去给在你的DVD站点浏览了的用户.但是这些用户还尚未注册
  * </p>
  *
  * <p>
@@ -44,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * recommenders can then produce recommendations anyway. To do so, wrap your real implementation in this
  * class:
  * </p>
- *
+ * 启用一个临时的user到一个存在的模型中,这种方式推荐能够产生推荐
  * <p>
  *
  * <pre>
@@ -53,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * ...
  * ItemSimilarity similarity = new LogLikelihoodSimilarity(realModel); // not plusModel
  * </pre>
- *
+ * 可以看到PlusAnonymousUserDataModel将真正的模型进行了包装
  * </p>
  *
  * <p>
@@ -82,9 +85,9 @@ public class PlusAnonymousUserDataModel implements DataModel {
 
   public static final long TEMP_USER_ID = Long.MIN_VALUE;
   
-  private final DataModel delegate;
-  private PreferenceArray tempPrefs;
-  private final FastIDSet prefItemIDs;
+  private final DataModel delegate;//真正的模型
+  private PreferenceArray tempPrefs;//临时的user-item-value集合
+  private final FastIDSet prefItemIDs;//存储临时的所有item集合
 
   private static final Logger log = LoggerFactory.getLogger(PlusAnonymousUserDataModel.class);
 

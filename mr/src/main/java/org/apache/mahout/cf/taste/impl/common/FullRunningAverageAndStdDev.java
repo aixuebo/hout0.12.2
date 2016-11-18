@@ -57,14 +57,14 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   
   @Override
   public synchronized void addDatum(double datum) {
-    super.addDatum(datum);
+    super.addDatum(datum);//计算好平均值和count
     int count = getCount();
     if (count == 1) {
       mk = datum;
       sk = 0.0;
     } else {
-      double oldmk = mk;
-      double diff = datum - oldmk;
+      double oldmk = mk;//上次添加的值
+      double diff = datum - oldmk;//本次差值
       mk += diff / count;
       sk += diff * (datum - mk);
     }
@@ -83,6 +83,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   
   /**
    * @throws UnsupportedOperationException
+   * 不支持更改操作,只能先减少原来的值,再加上新的值
    */
   @Override
   public void changeDatum(double delta) {

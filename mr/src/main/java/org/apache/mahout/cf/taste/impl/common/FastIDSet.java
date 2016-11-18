@@ -28,14 +28,15 @@ import com.google.common.base.Preconditions;
 
 /**
  * @see FastByIDMap
+ * 相当于set对象
  */
 public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> {
   
   private static final float DEFAULT_LOAD_FACTOR = 1.5f;
   
   /** Dummy object used to represent a key that has been removed. */
-  private static final long REMOVED = Long.MAX_VALUE;
-  private static final long NULL = Long.MIN_VALUE;
+  private static final long REMOVED = Long.MAX_VALUE;//表示该位置的元素已经被删除了 
+  private static final long NULL = Long.MIN_VALUE;//表示该位置元素尚未被存储
   
   private long[] keys;
   private float loadFactor;

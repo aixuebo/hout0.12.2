@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * </p>
  * 
  * @see UserSimilarity
+ * 计算两个item之间的相似度
  */
 public interface ItemSimilarity extends Refreshable {
   
@@ -42,6 +43,7 @@ public interface ItemSimilarity extends Refreshable {
    * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *  if either item is known to be non-existent in the data
    * @throws TasteException if an error occurs while accessing the data
+   * 返回两个item之间的相似度
    */
   double itemSimilarity(long itemID1, long itemID2) throws TasteException;
 
@@ -54,11 +56,13 @@ public interface ItemSimilarity extends Refreshable {
    * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *  if any item is known to be non-existent in the data
    * @throws TasteException if an error occurs while accessing the data
+   * 返回item1到item2集合中每一个元素的相似度
    */
   double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException;
 
   /**
    * @return all IDs of similar items, in no particular order
+   * 返回所有的item与参数item之间的相似度
    */
   long[] allSimilarItemIDs(long itemID) throws TasteException;
 }

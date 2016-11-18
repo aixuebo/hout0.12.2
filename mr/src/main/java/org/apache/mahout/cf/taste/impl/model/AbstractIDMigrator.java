@@ -27,7 +27,7 @@ import org.apache.mahout.cf.taste.model.IDMigrator;
 
 public abstract class AbstractIDMigrator implements IDMigrator {
 
-  private final MessageDigest md5Digest;
+  private final MessageDigest md5Digest;//MD5
   
   protected AbstractIDMigrator() {
     try {
@@ -40,6 +40,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
   
   /**
    * @return most significant 8 bytes of the MD5 hash of the string, as a long
+   * 将字符串转换成long类型,转换方式是MD5加密,然后再转换
    */
   protected final long hash(String value) {
     byte[] md5hash;
@@ -54,6 +55,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
     return hash;
   }
   
+  //将字符串转换成long类型
   @Override
   public long toLongID(String stringID) {
     return hash(stringID);

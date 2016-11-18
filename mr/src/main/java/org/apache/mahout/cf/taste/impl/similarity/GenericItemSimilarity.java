@@ -45,12 +45,18 @@ import com.google.common.base.Preconditions;
  * of item-based recommenders is that they can take advantage of the fact that item similarity is relatively
  * static, can be precomputed, and then used in computation to gain a significant performance advantage.
  * </p>
+ * 
+ * 参见GenericUserSimilarity
  */
 public final class GenericItemSimilarity implements ItemSimilarity {
 
   private static final long[] NO_IDS = new long[0];
   
+  //存储两个item之间的相似度  item1--item2--value(相似度),存储是itemid小的在第一个key存储
   private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<>();
+  
+  //存储两个item之间是有相似度联系的
+  //key是itemid,value是该item对应与哪些item集合有关系
   private final FastByIDMap<FastIDSet> similarItemIDsIndex = new FastByIDMap<>();
 
   /**
@@ -164,6 +170,8 @@ public final class GenericItemSimilarity implements ItemSimilarity {
           itemID1 = similarityItemID2;
           itemID2 = similarityItemID1;
         }
+        
+        //存储item1和item2的相似度
         FastByIDMap<Double> map = similarityMaps.get(itemID1);
         if (map == null) {
           map = new FastByIDMap<>();
@@ -199,6 +207,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @param itemID2
    *          second item
    * @return similarity between the two
+   * 获取两个item之间的相似度
    */
   @Override
   public double itemSimilarity(long itemID1, long itemID2) {
@@ -243,7 +252,9 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   // Do nothing
   }
   
-  /** Encapsulates a similarity between two items. Similarity must be in the range [-1.0,1.0]. */
+  /** Encapsulates a similarity between two items. Similarity must be in the range [-1.0,1.0]. 
+   * 该对象表示两个item之间的相似度
+   **/
   public static final class ItemItemSimilarity implements Comparable<ItemItemSimilarity> {
     
     private final long itemID1;

@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.model.Preference;
  * Encapsulates a simple boolean "preference" for an item whose value does not matter (is fixed at 1.0). This
  * is appropriate in situations where users conceptually have only a general "yes" preference for items,
  * rather than a spectrum of preference values.
+ * 当user-item-value组合中,没有value时,即只有user-item时候使用该类,因此value默认就是1
  */
 public final class BooleanPreference implements Preference, Serializable {
   

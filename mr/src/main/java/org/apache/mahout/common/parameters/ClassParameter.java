@@ -19,12 +19,21 @@ package org.apache.mahout.common.parameters;
 
 import org.apache.hadoop.conf.Configuration;
 
+//说明要获取的参数是一个class类型的对象
 public class ClassParameter extends AbstractParameter<Class> {
   
+	/**
+	 * @param prefix
+	 * @param name 通过prefix.name获取class的实现类
+	 * @param jobConf
+	 * @param defaultValue 默认值就是class类型
+	 * @param description
+	 */
   public ClassParameter(String prefix, String name, Configuration jobConf, Class<?> defaultValue, String description) {
     super(Class.class, prefix, name, jobConf, defaultValue, description);
   }
   
+  //将对应的value转换成class对象
   @Override
   public void setStringValue(String stringValue) {
     try {
@@ -34,6 +43,7 @@ public class ClassParameter extends AbstractParameter<Class> {
     }
   }
   
+  //返回class的全路径
   @Override
   public String getStringValue() {
     if (get() == null) {

@@ -22,11 +22,13 @@ import java.io.Serializable;
 /**
  * An alternate representation of an array of {@link Preference}. Implementations, in theory, can produce a
  * more memory-efficient representation.
+ * 表示一组user-item-偏好度集合
  */
 public interface PreferenceArray extends Cloneable, Serializable, Iterable<Preference> {
   
   /**
    * @return size of length of the "array"
+   * 集合有多少个元素
    */
   int length();
   
@@ -34,6 +36,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param i
    *          index
    * @return a materialized {@link Preference} representation of the preference at i
+   * 返回某一个元素
    */
   Preference get(int i);
   
@@ -42,6 +45,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * 
    * @param i
    * @param pref
+   * 设置某一个元素
    */
   void set(int i, Preference pref);
   
@@ -49,6 +53,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param i
    *          index
    * @return user ID from preference at i
+   * 获取第i个元素对应的userid
    */
   long getUserID(int i);
   
@@ -66,6 +71,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param i
    *          index
    * @return item ID from preference at i
+   * 获取第i个元素对应的itemid
    */
   long getItemID(int i);
   
@@ -81,6 +87,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
 
   /**
    * @return all user or item IDs
+   * 获取所有的userid或者itemid集合,这个取决于当前是userid对应itemid集合，还是itemid对应userid集合
    */
   long[] getIDs();
   
@@ -88,6 +95,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param i
    *          index
    * @return preference value from preference at i
+   * 获取第i个对应的偏好度
    */
   float getValue(int i);
   
@@ -108,21 +116,25 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
   
   /**
    * Sorts underlying array by user ID, ascending.
+   * 根据userid进行对数组排序,都是正序排列
    */
   void sortByUser();
   
   /**
    * Sorts underlying array by item ID, ascending.
+   * 根据itemid进行对数组排序,都是正序排列
    */
   void sortByItem();
   
   /**
    * Sorts underlying array by preference value, ascending.
+   * 根据偏好度value进行对数组排序,都是正序排列
    */
   void sortByValue();
   
   /**
    * Sorts underlying array by preference value, descending.
+   * 倒序排列
    */
   void sortByValueReversed();
   
@@ -130,6 +142,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param userID
    *          user ID
    * @return true if array contains a preference with given user ID
+   * 判断该userid是否在数组内
    */
   boolean hasPrefWithUserID(long userID);
   
@@ -137,6 +150,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * @param itemID
    *          item ID
    * @return true if array contains a preference with given item ID
+   * 判断item是否在数组内
    */
   boolean hasPrefWithItemID(long itemID);
   

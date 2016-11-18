@@ -39,6 +39,7 @@ import com.google.common.base.Preconditions;
  * A simple {@link DataModel} which uses given user data as its data source. This implementation
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
+ * 当user-item-value组合中,没有value时,即只有user-item时候使用该类
  */
 public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   

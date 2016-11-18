@@ -23,11 +23,12 @@ import com.google.common.base.Preconditions;
 
 /**
  * While long[] is an Iterable, it is not an Iterable&lt;Long&gt;. This adapter class addresses that.
+ * 迭代long类型的数组
  */
 public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
   
-  private final long[] array;
-  private int position;
+  private final long[] array;//原始数组
+  private int position;//当前位置
   private final int max;
   
   /**
@@ -78,6 +79,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
     throw new UnsupportedOperationException();
   }
   
+  //跳过若干个位置
   @Override
   public void skip(int n) {
     if (n > 0) {

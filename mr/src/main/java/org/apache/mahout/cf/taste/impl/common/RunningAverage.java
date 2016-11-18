@@ -24,6 +24,7 @@ package org.apache.mahout.cf.taste.impl.common;
  * the series of values, just its running average, so it doesn't even matter if you remove/change a value that
  * wasn't added.
  * </p>
+ * 计算平均值和count值,边运行边计算平均值和count
  */
 public interface RunningAverage {
   
@@ -32,6 +33,7 @@ public interface RunningAverage {
    *          new item to add to the running average
    * @throws IllegalArgumentException
    *           if datum is {@link Double#NaN}
+   * 添加一个double
    */
   void addDatum(double datum);
   
@@ -42,6 +44,7 @@ public interface RunningAverage {
    *           if datum is {@link Double#NaN}
    * @throws IllegalStateException
    *           if count is 0
+   * 减去一个数          
    */
   void removeDatum(double datum);
   
@@ -52,11 +55,18 @@ public interface RunningAverage {
    *           if delta is {@link Double#NaN}
    * @throws IllegalStateException
    *           if count is 0
+   * 表示其中原来添加进来的元素,有变更,比如原来加入的是20,现在变成23,因此参数就是3,此时平均值如何算,看FullRunningAverage实现
+   * 
+   * 比如现在一共存在的数字是
+   * (22+25+28+21)/4  现在参数是-3
+   * 因此变成(22+25+28+21-3)/4,即(22+25+28+21)/4 + (-3/4)
    */
   void changeDatum(double delta);
   
+  //count计数
   int getCount();
   
+  //平均值
   double getAverage();
 
   /**

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+//让平均值取负数
 public final class InvertedRunningAverage implements RunningAverage {
   
   private final RunningAverage delegate;

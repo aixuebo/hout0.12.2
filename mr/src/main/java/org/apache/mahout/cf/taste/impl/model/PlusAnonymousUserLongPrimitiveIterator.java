@@ -22,7 +22,7 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 
 final class PlusAnonymousUserLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
   
-  private final LongPrimitiveIterator delegate;
+  private final LongPrimitiveIterator delegate;//真正的模型对象
   private final long extraDatum;
   private boolean datumConsumed;
   

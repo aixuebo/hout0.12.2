@@ -22,6 +22,7 @@ package org.apache.mahout.cf.taste.model;
  * A {@link Preference} encapsulates an item and a preference value, which indicates the strength of the
  * preference for it. {@link Preference}s are associated to users.
  * </p>
+ * 表示一组偏好信息,即某个user对某个物品有偏好,并且偏好值是value
  */
 public interface Preference {
   

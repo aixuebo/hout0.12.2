@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.common;
 /**
  * <p>
  * Extends {@link RunningAverage} by adding standard deviation too.
+ * 运行期间计算标准差
  * </p>
  */
 public interface RunningAverageAndStdDev extends RunningAverage {

@@ -23,6 +23,7 @@ package org.apache.mahout.cf.taste.impl.common;
  * when an API needs to return {@link RunningAverageAndStdDev} but is not in a position to accept
  * updates to it.
  * </p>
+ * 固定值,标准差也是固定好的
  */
 public final class FixedRunningAverageAndStdDev extends FixedRunningAverage implements RunningAverageAndStdDev {
 

@@ -49,10 +49,10 @@ public final class GenericDataModel extends AbstractDataModel {
   
   private static final Logger log = LoggerFactory.getLogger(GenericDataModel.class);
   
-  private final long[] userIDs;
-  private final FastByIDMap<PreferenceArray> preferenceFromUsers;
-  private final long[] itemIDs;
-  private final FastByIDMap<PreferenceArray> preferenceForItems;
+  private final long[] userIDs;//所有涉及到的userid集合
+  private final long[] itemIDs;//所有涉及到的itemid集合
+  private final FastByIDMap<PreferenceArray> preferenceFromUsers;//key是userid,value是该userid对应的user-item-value集合
+  private final FastByIDMap<PreferenceArray> preferenceForItems;//key是itemid,value是该itemid对应的user-item-value集合
   private final FastByIDMap<FastByIDMap<Long>> timestamps;
   
   /**
@@ -75,29 +75,36 @@ public final class GenericDataModel extends AbstractDataModel {
    *
    * @param userData users to include; (see also {@link #toDataMap(FastByIDMap, boolean)})
    * @param timestamps optionally, provided timestamps of preferences as milliseconds since the epoch.
-   *  User IDs are mapped to maps of item IDs to Long timestamps.
+   *  User IDs are mapped to maps of item IDs to Long timestamps.参数映射关系user---map<item,timestamps>
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
     Preconditions.checkArgument(userData != null, "userData is null");
 
     this.preferenceFromUsers = userData;
+    
+    //key是itemId,value是同一个itemid对应的集合
     FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<>();
-    FastIDSet itemIDSet = new FastIDSet();
-    int currentCount = 0;
+    FastIDSet itemIDSet = new FastIDSet();//set集合,包含哪些itemid
+    
+    int currentCount = 0;//多少个user被处理了
     float maxPrefValue = Float.NEGATIVE_INFINITY;
     float minPrefValue = Float.POSITIVE_INFINITY;
-    for (Map.Entry<Long, PreferenceArray> entry : preferenceFromUsers.entrySet()) {
-      PreferenceArray prefs = entry.getValue();
-      prefs.sortByItem();
+    
+    for (Map.Entry<Long, PreferenceArray> entry : preferenceFromUsers.entrySet()) {//循环每一个userid
+      PreferenceArray prefs = entry.getValue();//该userid对应的集合
+      prefs.sortByItem();//按照itemid进行排序
       for (Preference preference : prefs) {
         long itemID = preference.getItemID();
         itemIDSet.add(itemID);
+        
         Collection<Preference> prefsForItem = prefsForItems.get(itemID);
         if (prefsForItem == null) {
           prefsForItem = Lists.newArrayListWithCapacity(2);
           prefsForItems.put(itemID, prefsForItem);
         }
         prefsForItem.add(preference);
+        
+        //计算最大和最小的偏好度
         float value = preference.getValue();
         if (value > maxPrefValue) {
           maxPrefValue = value;
@@ -121,7 +128,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
     this.preferenceForItems = toDataMap(prefsForItems, false);
 
-    for (Map.Entry<Long, PreferenceArray> entry : preferenceForItems.entrySet()) {
+    for (Map.Entry<Long, PreferenceArray> entry : preferenceForItems.entrySet()) {//每一个对象按照userid排序
       entry.getValue().sortByUser();
     }
 
@@ -154,8 +161,10 @@ public final class GenericDataModel extends AbstractDataModel {
   
   /**
    * Swaps, in-place, {@link List}s for arrays in {@link Map} values .
+   * @param data 参数内容user---Preference(user-item-preference偏爱度)
+   * @param byUser true表示是一个user对应一组集合,false表示是一个itemid对应的一组集合
+   * @return input value 转换成Preference数组形式
    * 
-   * @return input value
    */
   public static FastByIDMap<PreferenceArray> toDataMap(FastByIDMap<Collection<Preference>> data,
                                                        boolean byUser) {
@@ -197,14 +206,21 @@ public final class GenericDataModel extends AbstractDataModel {
     return this.preferenceForItems;
   }
 
+  //返回userid集合的迭代器,支持跳跃若干个对象
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
     return new LongPrimitiveArrayIterator(userIDs);
   }
   
+  @Override
+  public LongPrimitiveArrayIterator getItemIDs() {
+    return new LongPrimitiveArrayIterator(itemIDs);
+  }
+  
   /**
    * @throws NoSuchUserException
    *           if there is no such user
+   * 返回该userid对应的一组user-item-value集合,并且按照item排序好了
    */
   @Override
   public PreferenceArray getPreferencesFromUser(long userID) throws NoSuchUserException {
@@ -215,9 +231,10 @@ public final class GenericDataModel extends AbstractDataModel {
     return prefs;
   }
   
+  //返回该userid对应的一组itemid集合
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
-    PreferenceArray prefs = getPreferencesFromUser(userID);
+    PreferenceArray prefs = getPreferencesFromUser(userID);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
     int size = prefs.length();
     FastIDSet result = new FastIDSet(size);
     for (int i = 0; i < size; i++) {
@@ -226,11 +243,7 @@ public final class GenericDataModel extends AbstractDataModel {
     return result;
   }
   
-  @Override
-  public LongPrimitiveArrayIterator getItemIDs() {
-    return new LongPrimitiveArrayIterator(itemIDs);
-  }
-  
+  //返回该itemid对应的一组user-item-value集合,并且按照userid排序好了
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws NoSuchItemException {
     PreferenceArray prefs = preferenceForItems.get(itemID);
@@ -240,9 +253,10 @@ public final class GenericDataModel extends AbstractDataModel {
     return prefs;
   }
   
+  //返回userid-itemid对应的偏好度value,如果不存在,则返回null
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
-    PreferenceArray prefs = getPreferencesFromUser(userID);
+    PreferenceArray prefs = getPreferencesFromUser(userID);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
     int size = prefs.length();
     for (int i = 0; i < size; i++) {
       if (prefs.getItemID(i) == itemID) {
@@ -252,6 +266,7 @@ public final class GenericDataModel extends AbstractDataModel {
     return null;
   }
 
+  //返回user-item对应的时间戳,没有则返回null
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
     if (timestamps == null) {
@@ -264,16 +279,19 @@ public final class GenericDataModel extends AbstractDataModel {
     return itemTimestamps.get(itemID);
   }
 
+  //返回一共多少个itemid
   @Override
   public int getNumItems() {
     return itemIDs.length;
   }
   
+  //返回一共多少个userid
   @Override
   public int getNumUsers() {
     return userIDs.length;
   }
 
+  //返回该item对应多少人持有该用户的偏好度
   @Override
   public int getNumUsersWithPreferenceFor(long itemID) {
     PreferenceArray prefs1 = preferenceForItems.get(itemID);

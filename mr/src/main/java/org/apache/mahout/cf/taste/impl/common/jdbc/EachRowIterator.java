@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * Provides an {@link java.util.Iterator} over the result of an SQL query, as an iteration over the {@link ResultSet}.
  * While the same object will be returned from the iteration each time, it will be returned once for each row
  * of the result.
+ * 查询一个sql,迭代查询的结果集
  */
 final class EachRowIterator extends AbstractIterator<ResultSet> implements Closeable {
 
@@ -42,6 +43,7 @@ final class EachRowIterator extends AbstractIterator<ResultSet> implements Close
   private final PreparedStatement statement;
   private final ResultSet resultSet;
 
+  //查询一个sql,返回一个查询结果集
   EachRowIterator(DataSource dataSource, String sqlQuery) throws SQLException {
     try {
       connection = dataSource.getConnection();

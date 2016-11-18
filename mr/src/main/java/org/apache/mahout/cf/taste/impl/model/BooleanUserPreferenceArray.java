@@ -36,11 +36,13 @@ import org.apache.mahout.common.iterator.CountingIterator;
  * @see BooleanPreference
  * @see BooleanItemPreferenceArray
  * @see GenericUserPreferenceArray
+ * 当user-item-value组合中,没有value时,即只有user-item时候使用该类
+ * 该类表示一个user对应哪些item集合
  */
 public final class BooleanUserPreferenceArray implements PreferenceArray {
   
-  private final long[] ids;
-  private long id;
+  private long id;//userid
+  private final long[] ids;//items集合
   
   public BooleanUserPreferenceArray(int size) {
     this.ids = new long[size];

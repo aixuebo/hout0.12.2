@@ -36,8 +36,17 @@ public interface DataModel extends Refreshable, Serializable {
    * @return all user IDs in the model, in order
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回userid集合的迭代器,支持跳跃若干个对象,并且按照顺序排列好的userid进行迭代
    */
   LongPrimitiveIterator getUserIDs() throws TasteException;
+  
+  /**
+   * @return a {@link LongPrimitiveIterator} of all item IDs in the model, in order
+   * @throws TasteException
+   *           if an error occurs while accessing the data
+   * 返回itemid集合的迭代器,支持跳跃若干个对象,并且按照顺序排列好的itemid进行迭代
+   */
+  LongPrimitiveIterator getItemIDs() throws TasteException;
   
   /**
    * @param userID
@@ -47,6 +56,7 @@ public interface DataModel extends Refreshable, Serializable {
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
+   *  返回该userid对应的一组user-item-value集合,并且按照item排序好了
    */
   PreferenceArray getPreferencesFromUser(long userID) throws TasteException;
   
@@ -58,15 +68,9 @@ public interface DataModel extends Refreshable, Serializable {
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回该userid对应的一组itemid集合
    */
   FastIDSet getItemIDsFromUser(long userID) throws TasteException;
-  
-  /**
-   * @return a {@link LongPrimitiveIterator} of all item IDs in the model, in order
-   * @throws TasteException
-   *           if an error occurs while accessing the data
-   */
-  LongPrimitiveIterator getItemIDs() throws TasteException;
   
   /**
    * @param itemID
@@ -76,6 +80,7 @@ public interface DataModel extends Refreshable, Serializable {
    *           if the item does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回该itemid对应的一组user-item-value集合,并且按照userid排序好了
    */
   PreferenceArray getPreferencesForItem(long itemID) throws TasteException;
   
@@ -91,6 +96,7 @@ public interface DataModel extends Refreshable, Serializable {
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回userid-itemid对应的偏好度value,如果不存在,则返回null
    */
   Float getPreferenceValue(long userID, long itemID) throws TasteException;
 
@@ -103,6 +109,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @return time at which preference was set or null if no preference exists or its time is not known
    * @throws org.apache.mahout.cf.taste.common.NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
+   * 返回user-item对应的时间戳,没有则返回null
    */
   Long getPreferenceTime(long userID, long itemID) throws TasteException;
   
@@ -111,6 +118,7 @@ public interface DataModel extends Refreshable, Serializable {
    *         at least one user but could include more.
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回一共多少个itemid
    */
   int getNumItems() throws TasteException;
   
@@ -118,6 +126,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @return total number of users known to the model.
    * @throws TasteException
    *           if an error occurs while accessing the data
+   * 返回一共多少个userid
    */
   int getNumUsers() throws TasteException;
   
@@ -125,6 +134,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @param itemID item ID to check for
    * @return the number of users who have expressed a preference for the item
    * @throws TasteException if an error occurs while accessing the data
+   * 返回该item对应多少人持有该用户的偏好度
    */
   int getNumUsersWithPreferenceFor(long itemID) throws TasteException;
 
@@ -133,6 +143,7 @@ public interface DataModel extends Refreshable, Serializable {
    * @param itemID2 second item ID to check for
    * @return the number of users who have expressed a preference for the items
    * @throws TasteException if an error occurs while accessing the data
+   * 返回同时包含这两个item的用户数量
    */
   int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException;
   
@@ -152,7 +163,8 @@ public interface DataModel extends Refreshable, Serializable {
    * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
-   *           if an error occurs while accessing the data
+   *           if an error occurs while accessing the data、
+   * 设置一组user-item-value
    */
   void setPreference(long userID, long itemID, float value) throws TasteException;
   
@@ -171,6 +183,7 @@ public interface DataModel extends Refreshable, Serializable {
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
+   *  移除一组userid-itemid元素
    */
   void removePreference(long userID, long itemID) throws TasteException;
 
@@ -188,11 +201,13 @@ public interface DataModel extends Refreshable, Serializable {
    * In practice the application would cap this estimate to 5.0. Since evaluators evaluate
    * the difference between estimated and actual value, this at least prevents this effect from unfairly
    * penalizing a {@link org.apache.mahout.cf.taste.recommender.Recommender}
+   * 最大的偏好度
    */
   float getMaxPreference();
 
   /**
    * @see #getMaxPreference()
+   * 最小的偏好度
    */
   float getMinPreference();
   

@@ -35,15 +35,17 @@ public abstract class AbstractJDBCComponent {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCComponent.class);
   
-  private static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
+  private static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once 一次抓去多少数据
   protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   
+  //校验value不是空.如果是空,则打印日志
   protected static void checkNotNullAndLog(String argName, Object value) {
     Preconditions.checkArgument(value != null && !value.toString().isEmpty(),
       argName + " is null or empty");
     log.debug("{}: {}", argName, value);
   }
   
+  //校验value数组内容都不是空,如果是空,则打印日志
   protected static void checkNotNullAndLog(String argName, Object[] values) {
     Preconditions.checkArgument(values != null && values.length != 0, argName + " is null or zero-length");
     for (Object value : values) {
@@ -62,6 +64,7 @@ public abstract class AbstractJDBCComponent {
    * @return {@link DataSource} under that JNDI name
    * @throws TasteException
    *           if a JNDI error occurs
+   * 获取数据源
    */
   public static DataSource lookupDataSource(String dataSourceName) throws TasteException {
     Context context = null;

@@ -47,10 +47,16 @@ public class FullRunningAverage implements RunningAverage, Serializable {
    */
   @Override
   public synchronized void addDatum(double datum) {
-    if (++count == 1) {
+    if (++count == 1) {//第一个,因此平均值就是本身
       average = datum;
-    } else {
-      average = average * (count - 1) / count + datum / count;
+    } else {//因为不是第一个了,因此要计算一下平均值
+      /**
+       * 算法
+       * average * (count - 1) 平均值*以前的count = 以前的总值
+       * average * (count - 1) / count 表示以前的总值在现在的平均值
+       * datum / count 表示本次添加的平均值,因此就是总平均值
+       */
+      average = average * (count - 1) / count + datum / count;   
     }
   }
   
@@ -77,6 +83,11 @@ public class FullRunningAverage implements RunningAverage, Serializable {
    *          amount by which to change a datum in the running average
    * @throws IllegalStateException
    *           if count is 0
+   * 表示其中原来添加进来的元素,有变更,比如原来加入的是20,现在变成23,因此参数就是3,此时平均值如何算
+   * 
+   * 比如现在一共存在的数字是
+   * (22+25+28+21)/4  现在参数是-3
+   * 因此变成(22+25+28+21-3)/4,即(22+25+28+21)/4 + (-3/4)
    */
   @Override
   public synchronized void changeDatum(double delta) {

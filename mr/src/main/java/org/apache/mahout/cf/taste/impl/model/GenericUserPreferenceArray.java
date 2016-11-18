@@ -42,16 +42,18 @@ import org.apache.mahout.common.iterator.CountingIterator;
  * @see BooleanUserPreferenceArray
  * @see GenericItemPreferenceArray
  * @see GenericPreference
+ * 表示同一个user对应一组item和偏好度value集合
+ * 因此该对象就表示一个user下的item和偏好度value集合
  */
 public final class GenericUserPreferenceArray implements PreferenceArray {
 
-  private static final int ITEM = 1;
-  private static final int VALUE = 2;
-  private static final int VALUE_REVERSED = 3;
+  private static final int ITEM = 1;//按照itemid的正序排列数组集合
+  private static final int VALUE = 2;//按照value的正序排列数组集合
+  private static final int VALUE_REVERSED = 3;//按照value的倒序排列数组集合
 
-  private final long[] ids;
-  private long id;
-  private final float[] values;
+  private long id;//userId
+  private final long[] ids;//itemID对象集合
+  private final float[] values;//itemId对象对应的偏好度集合
 
   public GenericUserPreferenceArray(int size) {
     this.ids = new long[size];
@@ -65,13 +67,14 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     long userID = Long.MIN_VALUE;
     for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
-      if (i == 0) {
+      if (i == 0) {//第一个可以获取userid
         userID = pref.getUserID();
       } else {
-        if (userID != pref.getUserID()) {
+        if (userID != pref.getUserID()) {//必须保证每一个userId都是相同的,否则抛出异常
           throw new IllegalArgumentException("Not all user IDs are the same");
         }
       }
+      //设置对应的itemId和偏好度value
       ids[i] = pref.getItemID();
       values[i] = pref.getValue();
     }
@@ -82,16 +85,18 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
    * This is a private copy constructor for clone().
    */
   private GenericUserPreferenceArray(long[] ids, long id, float[] values) {
+	this.id = id;
     this.ids = ids;
-    this.id = id;
     this.values = values;
   }
 
+  //该user有多少个偏好的物品
   @Override
   public int length() {
     return ids.length;
   }
 
+  //设置某一个item对应的Preference对象
   @Override
   public Preference get(int i) {
     return new PreferenceView(i);
@@ -142,6 +147,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     return values[i];
   }
 
+  //根据userid进行对数组排序,都是正序排列
   @Override
   public void setValue(int i, float value) {
     values[i] = value;
@@ -150,26 +156,31 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   @Override
   public void sortByUser() { }
 
+  //根据itemid进行对数组排序,都是正序排列
   @Override
   public void sortByItem() {
     lateralSort(ITEM);
   }
 
+  //根据偏好度value进行对数组排序,都是正序排列
   @Override
   public void sortByValue() {
     lateralSort(VALUE);
   }
 
+  //倒序排列
   @Override
   public void sortByValueReversed() {
     lateralSort(VALUE_REVERSED);
   }
 
+  //判断该userid是否在数组内
   @Override
   public boolean hasPrefWithUserID(long userID) {
     return id == userID;
   }
 
+  //判断item是否在数组内
   @Override
   public boolean hasPrefWithItemID(long itemID) {
     for (long id : ids) {
@@ -180,6 +191,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     return false;
   }
 
+  //排序
   private void lateralSort(int type) {
     //Comb sort: http://en.wikipedia.org/wiki/Comb_sort
     int length = length();
@@ -242,6 +254,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     return id == otherArray.id && Arrays.equals(ids, otherArray.ids) && Arrays.equals(values, otherArray.values);
   }
 
+  //迭代每一个元素
   @Override
   public Iterator<Preference> iterator() {
     return Iterators.transform(new CountingIterator(length()),
@@ -274,14 +287,16 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     return result.toString();
   }
 
+  //返回一个视图,对应一个Preference对象
   private final class PreferenceView implements Preference {
 
-    private final int i;
+    private final int i;//获取第几个item对象
 
     private PreferenceView(int i) {
       this.i = i;
     }
 
+    //userid都是相同的
     @Override
     public long getUserID() {
       return GenericUserPreferenceArray.this.getUserID(i);
@@ -297,6 +312,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
       return values[i];
     }
 
+    //设置该item对应的偏好度
     @Override
     public void setValue(float value) {
       values[i] = value;

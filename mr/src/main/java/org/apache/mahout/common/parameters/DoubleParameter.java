@@ -19,12 +19,14 @@ package org.apache.mahout.common.parameters;
 
 import org.apache.hadoop.conf.Configuration;
 
+//表示从配置文件中获取的值转换成double类型的
 public class DoubleParameter extends AbstractParameter<Double> {
   
   public DoubleParameter(String prefix, String name, Configuration conf, double defaultValue, String description) {
     super(Double.class, prefix, name, conf, defaultValue, description);
   }
   
+  //将String对应得值转换成Double值
   @Override
   public void setStringValue(String stringValue) {
     set(Double.valueOf(stringValue));

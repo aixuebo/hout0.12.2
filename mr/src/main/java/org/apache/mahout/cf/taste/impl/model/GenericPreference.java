@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 /**
  * <p>
  * A simple {@link Preference} encapsulating an item and preference value.
+ * 表示简单的一个对象,表示user-item-value偏好度的映射关系
  * </p>
  */
 public class GenericPreference implements Preference, Serializable {

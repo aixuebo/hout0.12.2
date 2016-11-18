@@ -34,6 +34,7 @@ import com.google.common.base.Preconditions;
 /**
  * @see FastMap
  * @see FastIDSet
+ * 该类是一个Map,key是long类型的,value是泛型类型的
  */
 public final class FastByIDMap<V> implements Serializable, Cloneable {
   
@@ -41,8 +42,8 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   private static final float DEFAULT_LOAD_FACTOR = 1.5f;
   
   /** Dummy object used to represent a key that has been removed. */
-  private static final long REMOVED = Long.MAX_VALUE;
-  private static final long NULL = Long.MIN_VALUE;
+  private static final long REMOVED = Long.MAX_VALUE;//删除的值
+  private static final long NULL = Long.MIN_VALUE;//默认值
   
   private long[] keys;
   private V[] values;
@@ -303,6 +304,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     }
   }
   
+  //删除第lastNext位置元素
   void iteratorRemove(int lastNext) {
     if (lastNext >= values.length) {
       throw new NoSuchElementException();
@@ -407,8 +409,8 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   
   private final class KeyIterator extends AbstractLongPrimitiveIterator {
     
-    private int position;
-    private int lastNext = -1;
+    private int position;//下一个不是null的位置
+    private int lastNext = -1;//上一次的元素位置
     
     @Override
     public boolean hasNext() {
@@ -423,9 +425,10 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       if (position >= keys.length) {
         throw new NoSuchElementException();
       }
-      return keys[position++];
+      return keys[position++];//真正让position进行++了
     }
     
+    //只是看一下下一个元素,并不会移动指针
     @Override
     public long peek() {
       goToNext();
@@ -435,18 +438,21 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       return keys[position];
     }
     
+    //调用多少次,如果position位置都没有变化的话,结果都不会移动position位置
     private void goToNext() {
       int length = values.length;
-      while (position < length && values[position] == null) {
+      while (position < length && values[position] == null) {//找到下一个不是null的位置
         position++;
       }
     }
     
+    //删除上一个元素
     @Override
     public void remove() {
       iteratorRemove(lastNext);
     }
     
+    //跳过n个位置,而不是跳过n个有值的元素
     @Override
     public void skip(int n) {
       position += n;
@@ -508,24 +514,24 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     private final class MapEntry implements Map.Entry<Long,V> {
       
-      private final int index;
+      private final int index;//第几个元素
       
       private MapEntry(int index) {
         this.index = index;
       }
       
       @Override
-      public Long getKey() {
+      public Long getKey() {//对应的key
         return keys[index];
       }
       
       @Override
-      public V getValue() {
+      public V getValue() {//对应的value
         return values[index];
       }
       
       @Override
-      public V setValue(V value) {
+      public V setValue(V value) {//重新设置该位置对应的value
         Preconditions.checkArgument(value != null);
 
         V oldValue = values[index];
@@ -555,6 +561,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
         return new MapEntry(position++);
       }
       
+      //如果position没有变化,那么无论执行多少次该方法,都不会使指针真的移动
       private void goToNext() {
         int length = values.length;
         while (position < length && values[position] == null) {
@@ -624,8 +631,8 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     private final class ValueIterator implements Iterator<V> {
       
-      private int position;
-      private int lastNext = -1;
+      private int position;//下一个位置
+      private int lastNext = -1;//上一次的有值位置
       
       @Override
       public boolean hasNext() {
@@ -640,19 +647,20 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
         if (position >= values.length) {
           throw new NoSuchElementException();
         }
-        return values[position++];
+        return values[position++];//真正的让指针移动
       }
       
+      //如果position没有变化,那么无论执行多少次该方法,都不会使指针真的移动
       private void goToNext() {
         int length = values.length;
-        while (position < length && values[position] == null) {
+        while (position < length && values[position] == null) {//寻找下一个不是null的位置
           position++;
         }
       }
       
       @Override
       public void remove() {
-        iteratorRemove(lastNext);
+        iteratorRemove(lastNext);//删除上一个位置元素
       }
       
     }
