@@ -424,7 +424,7 @@ public class FileDataModel extends AbstractDataModel {
    *  处理一行数据
    */
   protected void processLine(String line,
-                             FastByIDMap<?> data, 
+                             FastByIDMap<?> data, //userid-itemid-value
                              FastByIDMap<FastByIDMap<Long>> timestamps,
                              boolean fromPriorData) {
 
