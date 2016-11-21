@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
  * <p>
  * A simple implementation of {@link RecommendedItem}.
  * </p>
+ * 推荐的商品以及对应的偏爱度
  */
 public final class GenericRecommendedItem implements RecommendedItem, Serializable {
   

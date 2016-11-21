@@ -23,6 +23,7 @@ import java.util.Comparator;
 
 /**
  * Modeling similarity towards another item
+ * 表示一个item和对应的相似度分数---该对象有个前提条件是属于某个item或者user的,即跟该user或者item相关的一个item-value对象
  */
 public class SimilarItem {
 
@@ -33,8 +34,8 @@ public class SimilarItem {
     }
   };
 
-  private long itemID;
-  private double similarity;
+  private long itemID;//相似的itemid
+  private double similarity;//相似度分数
 
   public SimilarItem(long itemID, double similarity) {
     set(itemID, similarity);

@@ -25,22 +25,26 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 /**
  * returns the result of {@link ItemSimilarity#allSimilarItemIDs(long)} as candidate items
+ * 所有相似的item都作为候选者
  */
 public class AllSimilarItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
-  private final ItemSimilarity similarity;
+  private final ItemSimilarity similarity;//返回两个item之间的相似度算法对象
 
   public AllSimilarItemsCandidateItemsStrategy(ItemSimilarity similarity) {
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
   }
 
+  /**
+   * preferredItemIDs 要与这些item进行相似度计算
+   */
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
     throws TasteException {
-    FastIDSet candidateItemIDs = new FastIDSet();
+    FastIDSet candidateItemIDs = new FastIDSet();//所有的候选item集合
     for (long itemID : preferredItemIDs) {
-      candidateItemIDs.addAll(similarity.allSimilarItemIDs(itemID));
+      candidateItemIDs.addAll(similarity.allSimilarItemIDs(itemID));//返回所有的item与参数item之间的相似度
     }
     if (!includeKnownItems) {
       candidateItemIDs.removeAll(preferredItemIDs);

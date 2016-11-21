@@ -37,8 +37,8 @@ public abstract class AbstractRecommender implements Recommender {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
   
-  private final DataModel dataModel;
-  private final CandidateItemsStrategy candidateItemsStrategy;
+  private final DataModel dataModel;//数据源对象
+  private final CandidateItemsStrategy candidateItemsStrategy;//选举item的策略
   
   protected AbstractRecommender(DataModel dataModel, CandidateItemsStrategy candidateItemsStrategy) {
     this.dataModel = Preconditions.checkNotNull(dataModel);
@@ -49,6 +49,7 @@ public abstract class AbstractRecommender implements Recommender {
     this(dataModel, getDefaultCandidateItemsStrategy());
   }
 
+  //默认选举策略
   protected static CandidateItemsStrategy getDefaultCandidateItemsStrategy() {
     return new PreferredItemsNeighborhoodCandidateItemsStrategy();
   }
@@ -60,6 +61,7 @@ public abstract class AbstractRecommender implements Recommender {
    * {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}, with a
    * {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.
    * </p>
+   * 给userid推荐商品item,返回最有可能的howMany个item
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
@@ -72,6 +74,9 @@ public abstract class AbstractRecommender implements Recommender {
    * {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}, with a
    * {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.
    * </p>
+   * 给userid推荐商品item,返回最有可能的howMany个item
+   * 
+   * 参数includeKnownItems true表示推荐的商品中不包含userid本来有兴趣的商品
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException {
@@ -80,6 +85,9 @@ public abstract class AbstractRecommender implements Recommender {
   
   /**
    * <p> Delegates to {@link Recommender#recommend(long, int, IDRescorer, boolean)}
+   * 给userid推荐商品item,返回最有可能的howMany个item
+   * 
+   * 参数rescorer 说明在最终推荐什么产品之前,可以重新给用户打分,用于自定义扩展,有时候业务需求,有时候根据某种业务可能会大更多的分数
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException{
@@ -93,6 +101,7 @@ public abstract class AbstractRecommender implements Recommender {
    *
    * @throws IllegalArgumentException
    *           if userID or itemID is {@code null}, or if value is {@link Double#NaN}
+   * 添加一个user-item-偏好分数数据
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
@@ -108,6 +117,7 @@ public abstract class AbstractRecommender implements Recommender {
    *
    * @throws IllegalArgumentException
    *           if userID or itemID is {@code null}
+   * 移除一个user-item的样本
    */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
@@ -122,15 +132,16 @@ public abstract class AbstractRecommender implements Recommender {
 
   /**
    * @param userID
-   *          ID of user being evaluated
+   *          ID of user being evaluated 准备推荐的用户
    * @param preferencesFromUser
-   *          the preferences from the user
+   *          the preferences from the user 与userID相似的用户集合
    * @param includeKnownItems
-   *          whether to include items already known by the user in recommendations
+   *          whether to include items already known by the user in recommendations  true表示该userID已经有的商品是不被再次推荐的
    * @return all items in the {@link DataModel} for which the user has not expressed a preference and could
    *         possibly be recommended to the user
    * @throws TasteException
    *           if an error occurs while listing items
+   * 返回用户可能要买的商品item集合
    */
   protected FastIDSet getAllOtherItems(long userID, PreferenceArray preferencesFromUser, boolean includeKnownItems)
       throws TasteException {

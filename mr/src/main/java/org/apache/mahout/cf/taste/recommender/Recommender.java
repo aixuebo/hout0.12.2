@@ -40,6 +40,7 @@ public interface Recommender extends Refreshable {
    *         least
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 给userid推荐商品item,返回最有可能的howMany个item
    */
   List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
 
@@ -51,9 +52,10 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to
    *         least
    * @param includeKnownItems
-   *          whether to include items already known by the user in recommendations
+   *          whether to include items already known by the user in recommendations,true表示推荐的商品中不包含userid本来有兴趣的商品
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 给userid推荐商品item,返回最有可能的howMany个item
    */
   List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException;
 
@@ -68,6 +70,7 @@ public interface Recommender extends Refreshable {
    *         least
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 给userid推荐商品item,返回最有可能的howMany个item
    */
   List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException;
   
@@ -77,15 +80,15 @@ public interface Recommender extends Refreshable {
    * @param howMany
    *          desired number of recommendations
    * @param rescorer
-   *          rescoring function to apply before final list of recommendations is determined
+   *          rescoring function to apply before final list of recommendations is determined 说明在最终推荐什么产品之前,可以重新给用户打分,用于自定义扩展,有时候业务需求,有时候根据某种业务可能会大更多的分数
    * @param includeKnownItems
    *          whether to include items already known by the user in recommendations
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to
    *         least
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 给userid推荐商品item,返回最有可能的howMany个item          
    */
-  
   List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
       throws TasteException;
   
@@ -99,6 +102,7 @@ public interface Recommender extends Refreshable {
    *         {@link Double#NaN}
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 预估user-item的偏好程度          
    */
   float estimatePreference(long userID, long itemID) throws TasteException;
   
@@ -111,6 +115,7 @@ public interface Recommender extends Refreshable {
    *          preference value
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 添加一个user-item-偏好分数数据
    */
   void setPreference(long userID, long itemID, float value) throws TasteException;
   
@@ -121,11 +126,13 @@ public interface Recommender extends Refreshable {
    *          item for which to remove preference
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel}
+   * 移除一个user-item的样本
    */
   void removePreference(long userID, long itemID) throws TasteException;
 
   /**
    * @return underlying {@link DataModel} used by this {@link Recommender} implementation
+   * 原始的数据模型
    */
   DataModel getDataModel();
 

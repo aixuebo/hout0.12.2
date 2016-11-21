@@ -23,11 +23,13 @@ import java.io.IOException;
 /**
  * Used to persist the results of a batch item similarity computation
  * conducted with a {@link BatchItemSimilarities} implementation
+ * 表示如何将item1-time2-value的信息写入成文件
  */
 public interface SimilarItemsWriter extends Closeable {
 
   void open() throws IOException;
 
+  //添加一个item与item-value集合
   void add(SimilarItems similarItems) throws IOException;
 
 }

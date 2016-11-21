@@ -32,6 +32,7 @@ import org.apache.mahout.cf.taste.similarity.precompute.SimilarItemsWriter;
 /**
  * Persist the precomputed item similarities to a file that can later be used
  * by a {@link org.apache.mahout.cf.taste.impl.similarity.file.FileItemSimilarity}
+ * 表示向文件中写入item-item-value的信息
  */
 public class FileSimilarItemsWriter implements SimilarItemsWriter {
 
@@ -47,10 +48,11 @@ public class FileSimilarItemsWriter implements SimilarItemsWriter {
     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
   }
 
+  //向文件中写入item--item--value信息
   @Override
   public void add(SimilarItems similarItems) throws IOException {
-    String itemID = String.valueOf(similarItems.getItemID());
-    for (SimilarItem similarItem : similarItems.getSimilarItems()) {
+    String itemID = String.valueOf(similarItems.getItemID());//item
+    for (SimilarItem similarItem : similarItems.getSimilarItems()) {//循环所有与item相关联的item内容
       writer.write(itemID);
       writer.write(',');
       writer.write(String.valueOf(similarItem.getItemID()));

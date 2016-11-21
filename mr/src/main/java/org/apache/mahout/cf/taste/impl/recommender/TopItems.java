@@ -88,21 +88,22 @@ public final class TopItems {
     return result;
   }
   
+  //迭代随机抽样出来的user,返回前n个邻居
   public static long[] getTopUsers(int howMany,
                                    LongPrimitiveIterator allUserIDs,
                                    IDRescorer rescorer,
                                    Estimator<Long> estimator) throws TasteException {
     Queue<SimilarUser> topUsers = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
-    boolean full = false;
-    double lowestTopValue = Double.NEGATIVE_INFINITY;
-    while (allUserIDs.hasNext()) {
+    boolean full = false;//是否优先队列数据满了
+    double lowestTopValue = Double.NEGATIVE_INFINITY;//优先队列中最低的分数
+    while (allUserIDs.hasNext()) {//循环所有的user
       long userID = allUserIDs.next();
       if (rescorer != null && rescorer.isFiltered(userID)) {
         continue;
       }
       double similarity;
       try {
-        similarity = estimator.estimate(userID);
+        similarity = estimator.estimate(userID);//计算两个user的相似度
       } catch (NoSuchUserException nsue) {
         continue;
       }

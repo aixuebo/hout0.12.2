@@ -25,15 +25,17 @@ import java.util.Iterator;
 
 /**
  * {@link Iterable} to be able to read a file linewise into a {@link GenericItemSimilarity}
+ * 从文件里面读取数据,每一个数据是item和item之间的相似度对象,即item1--item2--value
  */
 final class FileItemItemSimilarityIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
 
-  private final File similaritiesFile;
+  private final File similaritiesFile;//相似文件
 
   FileItemItemSimilarityIterable(File similaritiesFile) {
     this.similaritiesFile = similaritiesFile;
   }
 
+  //生成迭代器对象
   @Override
   public Iterator<GenericItemSimilarity.ItemItemSimilarity> iterator() {
     try {

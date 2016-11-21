@@ -34,6 +34,7 @@ public interface UserNeighborhood extends Refreshable {
    * @return IDs of users in the neighborhood
    * @throws TasteException
    *           if an error occurs while accessing data
+   * 计算参数userid的邻居集合被返回
    */
   long[] getUserNeighborhood(long userID) throws TasteException;
   

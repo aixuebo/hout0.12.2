@@ -35,6 +35,7 @@ import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
  * not expressed any preference for. This might be an average of other preferences scores from that user, for
  * example. This technique is sometimes called "default voting".
  * </p>
+ * 为每一个user打偏爱度分,该分数是该用户所有item对应value的平均值
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
   
@@ -50,6 +51,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     refresh(null);
   }
   
+  //返回该user对应的平均值,跟该item无关系
   @Override
   public float inferPreference(long userID, long itemID) throws TasteException {
     return averagePreferenceValue.get(userID);
@@ -64,11 +66,13 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     
     @Override
     public Float get(Long key) throws TasteException {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(key);
-      int size = prefs.length();
-      if (size == 0) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(key);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
+      int size = prefs.length();//该用户所有的item数量
+      if (size == 0) {//说明该用户没有关注item
         return ZERO;
       }
+      
+      //获取该user所有item的平均值
       RunningAverage average = new FullRunningAverage();
       for (int i = 0; i < size; i++) {
         average.addDatum(prefs.getValue(i));

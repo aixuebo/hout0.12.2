@@ -22,6 +22,9 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 
+/**
+ * 所有不是自己的item都是候选
+ */
 public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
   /** return all items the user has not yet seen */
@@ -29,7 +32,7 @@ public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandida
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
     throws TasteException {
     FastIDSet possibleItemIDs = new FastIDSet(dataModel.getNumItems());
-    LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();
+    LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();//所有的item
     while (allItemIDs.hasNext()) {
       possibleItemIDs.add(allItemIDs.nextLong());
     }

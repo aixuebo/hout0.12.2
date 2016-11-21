@@ -34,6 +34,7 @@ import org.apache.mahout.common.RandomUtils;
 /**
  * Produces random recommendations and preference estimates. This is likely only useful as a novelty and for
  * benchmarking.
+ * 随机产生推荐的商品以及偏爱度,这个姿势适用于新型的业务
  */
 public final class RandomRecommender extends AbstractRecommender {
   
@@ -45,10 +46,12 @@ public final class RandomRecommender extends AbstractRecommender {
     super(dataModel);
     float maxPref = Float.NEGATIVE_INFINITY;
     float minPref = Float.POSITIVE_INFINITY;
-    LongPrimitiveIterator userIterator = dataModel.getUserIDs();
-    while (userIterator.hasNext()) {
+    
+    //设置最大偏好度和最小偏好度
+    LongPrimitiveIterator userIterator = dataModel.getUserIDs();//返回所有user的迭代器
+    while (userIterator.hasNext()) {//循环每一个user
       long userID = userIterator.next();
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);//该user对应哪些商品
       for (int i = 0; i < prefs.length(); i++) {
         float prefValue = prefs.getValue(i);
         if (prefValue < minPref) {

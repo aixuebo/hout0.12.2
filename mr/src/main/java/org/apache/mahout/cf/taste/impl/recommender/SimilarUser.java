@@ -19,7 +19,9 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.common.RandomUtils;
 
-/** Simply encapsulates a user and a similarity value. */
+/** Simply encapsulates a user and a similarity value. 
+ * 表示user和user之间的相似度,并且支持按照相似度进行排序
+ **/
 public final class SimilarUser implements Comparable<SimilarUser> {
   
   private final long userID;
@@ -57,7 +59,9 @@ public final class SimilarUser implements Comparable<SimilarUser> {
     return "SimilarUser[user:" + userID + ", similarity:" + similarity + ']';
   }
   
-  /** Defines an ordering from most similar to least similar. */
+  /** Defines an ordering from most similar to least similar. 
+   * 按照相似度进行排序
+   **/
   @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.getSimilarity();

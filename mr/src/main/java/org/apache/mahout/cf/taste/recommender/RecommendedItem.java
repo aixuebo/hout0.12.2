@@ -22,6 +22,9 @@ package org.apache.mahout.cf.taste.recommender;
  * Implementations encapsulate items that are recommended, and include the item recommended and a value
  * expressing the strength of the preference.
  * </p>
+ * 该类代表关联的itemid和相似度值,即有个前提条件,有一个user或者item存在,该RecommendedItem对象是相对于存在的user或者item进行关联的
+ * 
+ * 比如有一个userid为5,持有一个该对象RecommendedItem,因此表示user5对item有多少相似度值value
  */
 public interface RecommendedItem {
   

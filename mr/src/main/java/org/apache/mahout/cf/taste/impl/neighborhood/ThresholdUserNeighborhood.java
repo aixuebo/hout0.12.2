@@ -31,10 +31,11 @@ import com.google.common.base.Preconditions;
  * Computes a neigbhorhood consisting of all users whose similarity to the given user meets or exceeds a
  * certain threshold. Similarity is defined by the given {@link UserSimilarity}.
  * </p>
+ * 返回超过该伐值的所有邻居
  */
 public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   
-  private final double threshold;
+  private final double threshold;//伐值
   
   /**
    * @param threshold
@@ -74,20 +75,24 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     this.threshold = threshold;
   }
   
+  //随机查找所有的uer,对比是参数user邻居的,只要超过伐值,则认为就是邻居
   @Override
   public long[] getUserNeighborhood(long userID) throws TasteException {
     
     DataModel dataModel = getDataModel();
-    FastIDSet neighborhood = new FastIDSet();
+    FastIDSet neighborhood = new FastIDSet();//邻居集合
+    
+    //从全部user中随机抽取一些user,产生的迭代器,迭代抽取的user集合
     LongPrimitiveIterator usersIterable = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel
         .getUserIDs(), getSamplingRate());
-    UserSimilarity userSimilarityImpl = getUserSimilarity();
+    
+    UserSimilarity userSimilarityImpl = getUserSimilarity();//如何计算user和user之间的相似度的对象
     
     while (usersIterable.hasNext()) {
       long otherUserID = usersIterable.next();
       if (userID != otherUserID) {
         double theSimilarity = userSimilarityImpl.userSimilarity(userID, otherUserID);
-        if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {
+        if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {//只要大于伐值,则就添加该用户作为邻居
           neighborhood.add(otherUserID);
         }
       }

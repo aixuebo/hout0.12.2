@@ -37,6 +37,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @return items most similar to the given item, ordered from most similar to least
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * 要找与itemid相似的itemid集合,howMany表示最多找多少个相似的就不找了
    */
   List<RecommendedItem> mostSimilarItems(long itemID, int howMany) throws TasteException;
   
@@ -51,6 +52,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @return itemss most similar to the given item, ordered from most similar to least
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * 要找与itemid相似的itemid集合
    */
   List<RecommendedItem> mostSimilarItems(long itemID, int howMany, Rescorer<LongPair> rescorer) throws TasteException;
   
@@ -62,6 +64,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @return items most similar to the given items, ordered from most similar to least
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * 要找与itemid相似的itemid集合
    */
   List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany) throws TasteException;
   

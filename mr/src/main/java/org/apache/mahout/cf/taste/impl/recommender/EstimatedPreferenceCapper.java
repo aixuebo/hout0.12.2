@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
  * Simple class which encapsulates restricting a preference value
  * to a predefined range. The simple logic is wrapped up here for
  * performance reasons.
+ * 约束.让最终用户的偏好度一定在max和min之间
  */
 public final class EstimatedPreferenceCapper {
 

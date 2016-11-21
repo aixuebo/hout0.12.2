@@ -47,6 +47,7 @@ import com.google.common.base.Preconditions;
  * </p>
  * 
  * 参见GenericUserSimilarity
+ * 可以得到两个item之间的相似度
  */
 public final class GenericItemSimilarity implements ItemSimilarity {
 

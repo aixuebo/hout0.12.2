@@ -32,6 +32,7 @@ public interface IDRescorer {
    * @param originalScore
    *          original score
    * @return modified score, or {@link Double#NaN} to indicate that this should be excluded entirely
+   * 可以对id对应的原始分数originalScore进行重新计算分数
    */
   double rescore(long id, double originalScore);
   
@@ -41,6 +42,7 @@ public interface IDRescorer {
    * @param id
    *          ID of thing (user, item, etc.) to rescore
    * @return {@code true} to exclude, {@code false} otherwise
+   * true表示该id已经被过滤掉了
    */
   boolean isFiltered(long id);
   

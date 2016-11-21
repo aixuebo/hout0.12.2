@@ -71,23 +71,32 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     this.batchSize = batchSize;
   }
 
+  /**
+   * degreeOfParallelism 线程数
+   * 
+   * writer 表示最终要向哪个输出流中写入数据
+   * 返回值是一共多少个item-item-value数据
+   */
   @Override
   public int computeItemSimilarities(int degreeOfParallelism, int maxDurationInHours, SimilarItemsWriter writer)
     throws IOException {
 
+	//创建线程池
     ExecutorService executorService = Executors.newFixedThreadPool(degreeOfParallelism + 1);
 
     Output output = null;
     try {
-      writer.open();
+      writer.open();//打开输出文件
 
-      DataModel dataModel = getRecommender().getDataModel();
+      DataModel dataModel = getRecommender().getDataModel();//获取user-item-value的模型
 
-      BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize, degreeOfParallelism);
-      BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<>();
+      //不断的从dataModel中读取user-item-value值,存储到共享队列中,让消费者worker线程从队列取数据工作
+      BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize, degreeOfParallelism);//一个共享队列,多线程都从该队列获取数据
+      
+      BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<>();//多线程的结果都写入该队列,该队列也是共享的
 
-      AtomicInteger numActiveWorkers = new AtomicInteger(degreeOfParallelism);
-      for (int n = 0; n < degreeOfParallelism; n++) {
+      AtomicInteger numActiveWorkers = new AtomicInteger(degreeOfParallelism);//活着的工作线程数量
+      for (int n = 0; n < degreeOfParallelism; n++) {//线程池开启多线程
         executorService.execute(new SimilarItemsWorker(n, itemsIDsInBatches, results, numActiveWorkers));
       }
 
@@ -112,27 +121,36 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     return output.getNumSimilaritiesProcessed();
   }
 
+  /**
+   * 不断的从dataModel中读取user-item-value值,存储到共享队列中,让消费者worker线程从队列取数据工作
+   * @param dataModel 获取user-item-value的模型
+   * @param batchSize 一次批处理的数量
+   * @param degreeOfParallelism 多线程数量
+   * @return
+   * @throws TasteException
+   */
   private static BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize,
                                                              int degreeOfParallelism)
       throws TasteException {
 
-    LongPrimitiveIterator itemIDs = dataModel.getItemIDs();
-    int numItems = dataModel.getNumItems();
+    LongPrimitiveIterator itemIDs = dataModel.getItemIDs();//获取所有的item集合
+    int numItems = dataModel.getNumItems();//返回一共多少个itemid
 
+    //队列的元素是long[] batch,即一个批处理的结果,itemid集合
     BlockingQueue<long[]> itemIDBatches = new LinkedBlockingQueue<>((numItems / batchSize) + 1);
 
-    long[] batch = new long[batchSize];
+    long[] batch = new long[batchSize];//一次批处理的集合,不断的用同一组批处理文件
     int pos = 0;
-    while (itemIDs.hasNext()) {
-      batch[pos] = itemIDs.nextLong();
+    while (itemIDs.hasNext()) {//不断迭代item
+      batch[pos] = itemIDs.nextLong();//将item添加到批处理数组中
       pos++;
-      if (pos == batchSize) {
+      if (pos == batchSize) {//当达到批处理伐值时候,重新
         itemIDBatches.add(batch.clone());
         pos = 0;
       }
     }
 
-    if (pos > 0) {
+    if (pos > 0) {//将剩余的文件从0到pos位置的内容,写入到队列中
       long[] lastBatch = new long[pos];
       System.arraycopy(batch, 0, lastBatch, 0, pos);
       itemIDBatches.add(lastBatch);
@@ -151,10 +169,10 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
   private static class Output implements Runnable {
 
-    private final BlockingQueue<List<SimilarItems>> results;
+    private final BlockingQueue<List<SimilarItems>> results;//多线程的结果都写入该队列,该队列也是共享的
     private final SimilarItemsWriter writer;
-    private final AtomicInteger numActiveWorkers;
-    private int numSimilaritiesProcessed = 0;
+    private final AtomicInteger numActiveWorkers;//活着的工作线程数量
+    private int numSimilaritiesProcessed = 0;//返回一共处理了多少个item--item--value数据
 
     Output(BlockingQueue<List<SimilarItems>> results, SimilarItemsWriter writer, AtomicInteger numActiveWorkers) {
       this.results = results;
@@ -168,13 +186,13 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
     @Override
     public void run() {
-      while (numActiveWorkers.get() != 0 || !results.isEmpty()) {
+      while (numActiveWorkers.get() != 0 || !results.isEmpty()) {//有工作线程还活着,并且有输出内容,则就不断处理
         try {
-          List<SimilarItems> similarItemsOfABatch = results.poll(10, TimeUnit.MILLISECONDS);
+          List<SimilarItems> similarItemsOfABatch = results.poll(10, TimeUnit.MILLISECONDS);//从结果集中取出10个元素
           if (similarItemsOfABatch != null) {
             for (SimilarItems similarItems : similarItemsOfABatch) {
-              writer.add(similarItems);
-              numSimilaritiesProcessed += similarItems.numSimilarItems();
+              writer.add(similarItems);//向writer中添加结果,即一个itemid对一组itemid和偏好值的输出
+              numSimilaritiesProcessed += similarItems.numSimilarItems();//返回该item本次跟多少个item有关联
             }
           }
         } catch (Exception e) {
@@ -184,12 +202,15 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     }
   }
 
+  /**
+   * 表示每一个工作的线程
+   */
   private class SimilarItemsWorker implements Runnable {
 
-    private final int number;
-    private final BlockingQueue<long[]> itemIDBatches;
-    private final BlockingQueue<List<SimilarItems>> results;
-    private final AtomicInteger numActiveWorkers;
+    private final int number;//表示线程的ID,即第几个线程
+    private final BlockingQueue<long[]> itemIDBatches;//一个共享队列,多线程都从该队列获取数据
+    private final BlockingQueue<List<SimilarItems>> results;//多线程的结果都写入该队列,该队列也是共享的
+    private final AtomicInteger numActiveWorkers;//活着的工作线程数量
 
     SimilarItemsWorker(int number, BlockingQueue<long[]> itemIDBatches, BlockingQueue<List<SimilarItems>> results,
         AtomicInteger numActiveWorkers) {
@@ -203,19 +224,20 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     public void run() {
 
       int numBatchesProcessed = 0;
-      while (!itemIDBatches.isEmpty()) {
+      while (!itemIDBatches.isEmpty()) {//队列有内容,则不停止
         try {
-          long[] itemIDBatch = itemIDBatches.take();
+          //itemid集合
+          long[] itemIDBatch = itemIDBatches.take();//从队列中获取一组数据
 
           List<SimilarItems> similarItemsOfBatch = new ArrayList<>(itemIDBatch.length);
-          for (long itemID : itemIDBatch) {
-            List<RecommendedItem> similarItems = getRecommender().mostSimilarItems(itemID, getSimilarItemsPerItem());
+          for (long itemID : itemIDBatch) {//循环所有的item,找到与该item相关联的item集合和相似度集合
+            List<RecommendedItem> similarItems = getRecommender().mostSimilarItems(itemID, getSimilarItemsPerItem());//找item相似的数据.最多找多少个相似的item,getSimilarItemsPerItem
             similarItemsOfBatch.add(new SimilarItems(itemID, similarItems));
           }
 
-          results.offer(similarItemsOfBatch);
+          results.offer(similarItemsOfBatch);//将计算的结果存储到结果中
 
-          if (++numBatchesProcessed % 5 == 0) {
+          if (++numBatchesProcessed % 5 == 0) {//打印第几个工作线程已经处理了多少次数据了
             log.info("worker {} processed {} batches", number, numBatchesProcessed);
           }
 
@@ -224,7 +246,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
         }
       }
       log.info("worker {} processed {} batches. done.", number, numBatchesProcessed);
-      numActiveWorkers.decrementAndGet();
+      numActiveWorkers.decrementAndGet();//活着的工作线程数量减少1个
     }
   }
 }

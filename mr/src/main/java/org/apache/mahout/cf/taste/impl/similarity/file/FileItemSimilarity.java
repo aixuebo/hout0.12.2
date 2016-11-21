@@ -52,6 +52,8 @@ import com.google.common.base.Preconditions;
  * This class is not intended for use with very large amounts of data. For that, a JDBC-backed {@link ItemSimilarity}
  * and a database are more appropriate.
  * </p>
+ * 用文件存储好已经存在的item1--item2-value映射关系,该文件可以更改内容,会自动加载该文件。
+ * 将文件内容解析后,组装成GenericItemSimilarity对象,因此该类就可以被外界调用,获取两个item之间的相似度了
  */
 public class FileItemSimilarity implements ItemSimilarity {
 
@@ -59,7 +61,7 @@ public class FileItemSimilarity implements ItemSimilarity {
 
   private ItemSimilarity delegate;
   private final ReentrantLock reloadLock;
-  private final File dataFile;
+  private final File dataFile;//数据文件
   private long lastModified;
   private final long minReloadIntervalMS;
 

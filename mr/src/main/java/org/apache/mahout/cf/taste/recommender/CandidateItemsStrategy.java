@@ -31,6 +31,15 @@ public interface CandidateItemsStrategy extends Refreshable {
   /**
    * @return IDs of all items that could be recommended to the user
    */
+	/**
+	 * 
+	 * @param userID 要推荐的userid
+	 * @param preferencesFromUser 该推荐的userid对应哪些itemid集合
+	 * @param dataModel
+	 * @param includeKnownItems
+	 * @return
+	 * @throws TasteException
+	 */
   FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel,
      boolean includeKnownItems) throws TasteException;
   

@@ -32,8 +32,8 @@ import com.google.common.base.Preconditions;
 /** A caching wrapper around an underlying {@link UserNeighborhood} implementation. */
 public final class CachingUserNeighborhood implements UserNeighborhood {
   
-  private final UserNeighborhood neighborhood;
-  private final Cache<Long,long[]> neighborhoodCache;
+  private final UserNeighborhood neighborhood;//真正的去获取一个user对应的邻居
+  private final Cache<Long,long[]> neighborhoodCache;//缓存类,因为计算user的邻居是耗时的,因此要缓存一下
   
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
     Preconditions.checkArgument(neighborhood != null, "neighborhood is null");

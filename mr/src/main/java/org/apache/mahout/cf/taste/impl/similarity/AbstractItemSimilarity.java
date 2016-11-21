@@ -30,7 +30,7 @@ import java.util.Collection;
 
 public abstract class AbstractItemSimilarity implements ItemSimilarity {
 
-  private final DataModel dataModel;
+  private final DataModel dataModel;//user-item-相似度数据源
   private final RefreshHelper refreshHelper;
 
   protected AbstractItemSimilarity(DataModel dataModel) {
@@ -44,6 +44,7 @@ public abstract class AbstractItemSimilarity implements ItemSimilarity {
     return dataModel;
   }
 
+  //计算item与所有的item之间的相似度
   @Override
   public long[] allSimilarItemIDs(long itemID) throws TasteException {
     FastIDSet allSimilarItemIDs = new FastIDSet();

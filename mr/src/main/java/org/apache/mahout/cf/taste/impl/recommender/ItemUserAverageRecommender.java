@@ -53,9 +53,9 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   
   private static final Logger log = LoggerFactory.getLogger(ItemUserAverageRecommender.class);
   
-  private final FastByIDMap<RunningAverage> itemAverages;
-  private final FastByIDMap<RunningAverage> userAverages;
-  private final RunningAverage overallAveragePrefValue;
+  private final FastByIDMap<RunningAverage> itemAverages;//计算每一个item对应一个偏好度平均值
+  private final FastByIDMap<RunningAverage> userAverages;//计算每一个user对应一个偏好度平均值
+  private final RunningAverage overallAveragePrefValue;//计算所有偏好度的平均值
   private final ReadWriteLock buildAveragesLock;
   private final RefreshHelper refreshHelper;
   
@@ -82,8 +82,8 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
-    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
-    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);//返回用户可能要买的商品item集合
 
     TopItems.Estimator<Long> estimator = new Estimator(userID);
 
@@ -94,6 +94,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     return topItems;
   }
   
+  //返回该user-item之间的相似度
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
     DataModel dataModel = getDataModel();
@@ -104,9 +105,11 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     return doEstimatePreference(userID, itemID);
   }
   
+  //预估user-item之间的相似度
   private float doEstimatePreference(long userID, long itemID) {
     buildAveragesLock.readLock().lock();
     try {
+    	//没有该user或者没有该item是不现实的,因此返回Float.NaN
       RunningAverage itemAverage = itemAverages.get(itemID);
       if (itemAverage == null) {
         return Float.NaN;
@@ -122,18 +125,19 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     }
   }
 
+  //初始化平均值信息
   private void buildAverageDiffs() throws TasteException {
     try {
       buildAveragesLock.writeLock().lock();
       DataModel dataModel = getDataModel();
-      LongPrimitiveIterator it = dataModel.getUserIDs();
+      LongPrimitiveIterator it = dataModel.getUserIDs();//所有的userid集合
       while (it.hasNext()) {
-        long userID = it.nextLong();
-        PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+        long userID = it.nextLong();//userid
+        PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
         int size = prefs.length();
         for (int i = 0; i < size; i++) {
-          long itemID = prefs.getItemID(i);
-          float value = prefs.getValue(i);
+          long itemID = prefs.getItemID(i);//item
+          float value = prefs.getValue(i);//对应的偏好度
           addDatumAndCreateIfNeeded(itemID, value, itemAverages);
           addDatumAndCreateIfNeeded(userID, value, userAverages);
           overallAveragePrefValue.addDatum(value);

@@ -23,8 +23,8 @@ import java.io.IOException;
 
 public abstract class BatchItemSimilarities {
 
-  private final ItemBasedRecommender recommender;
-  private final int similarItemsPerItem;
+  private final ItemBasedRecommender recommender;//真正去计算两个item如何相似的算法接口
+  private final int similarItemsPerItem;//每一个item找到多少个与其相似的item
 
   /**
    * @param recommender recommender to use
@@ -44,10 +44,10 @@ public abstract class BatchItemSimilarities {
   }
 
   /**
-   * @param degreeOfParallelism number of threads to use for the computation
-   * @param maxDurationInHours  maximum duration of the computation
-   * @param writer  {@link SimilarItemsWriter} used to persist the results
-   * @return  the number of similarities precomputed
+   * @param degreeOfParallelism number of threads to use for the computation 多少个线程处理
+   * @param maxDurationInHours  maximum duration of the computation 计算的最大时间
+   * @param writer  {@link SimilarItemsWriter} used to persist the results 最终数据写入到哪里
+   * @return  the number of similarities precomputed 返回值是一共多少个item-item-value数据
    * @throws IOException
    * @throws RuntimeException if the computation takes longer than maxDurationInHours
    */

@@ -23,6 +23,7 @@ import org.apache.mahout.common.LongPair;
  * <p>
  * Interface implemented by "user-based" recommenders.
  * </p>
+ * 实现一个计算user相似的用户集合算法
  */
 public interface UserBasedRecommender extends Recommender {
   
@@ -34,6 +35,7 @@ public interface UserBasedRecommender extends Recommender {
    * @return users most similar to the given user
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * 计算最有可能与该用户相似的用户集合
    */
   long[] mostSimilarUserIDs(long userID, int howMany) throws TasteException;
   
@@ -48,6 +50,7 @@ public interface UserBasedRecommender extends Recommender {
    * @return IDs of users most similar to the given user
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * 计算最有可能与该用户相似的用户集合
    */
   long[] mostSimilarUserIDs(long userID, int howMany, Rescorer<LongPair> rescorer) throws TasteException;
   

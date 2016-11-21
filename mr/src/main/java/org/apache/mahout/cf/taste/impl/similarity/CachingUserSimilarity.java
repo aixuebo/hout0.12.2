@@ -34,6 +34,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * Caches the results from an underlying {@link UserSimilarity} implementation.
+ * 对similarity包装一层缓冲层,避免每次都从similarity中计算数据
  */
 public final class CachingUserSimilarity implements UserSimilarity {
   

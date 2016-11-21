@@ -31,6 +31,9 @@ import java.util.regex.Pattern;
 /**
  * a simple iterator using a {@link FileLineIterator} internally, parsing each
  * line into an {@link GenericItemSimilarity.ItemItemSimilarity}.
+ * 解析一个文件,文件的内容每一行是item1-item2-value,即两个物品的相似度作为一行数据存储
+ * 
+ * 该对象是一个迭代对象
  */
 final class FileItemItemSimilarityIterator extends ForwardingIterator<GenericItemSimilarity.ItemItemSimilarity> {
 
@@ -39,11 +42,12 @@ final class FileItemItemSimilarityIterator extends ForwardingIterator<GenericIte
   private final Iterator<GenericItemSimilarity.ItemItemSimilarity> delegate;
 
   FileItemItemSimilarityIterator(File similaritiesFile) throws IOException {
+	  //一行一行读取该文件,返回一个一行一行的代理类
     delegate = Iterators.transform(
         new FileLineIterator(similaritiesFile),
         new Function<String, GenericItemSimilarity.ItemItemSimilarity>() {
           @Override
-          public GenericItemSimilarity.ItemItemSimilarity apply(String from) {
+          public GenericItemSimilarity.ItemItemSimilarity apply(String from) {//每一行的信息进行,\t拆分,生成item1-item2-value组成的记录
             String[] tokens = SEPARATOR.split(from);
             return new GenericItemSimilarity.ItemItemSimilarity(Long.parseLong(tokens[0]),
                                                                 Long.parseLong(tokens[1]),

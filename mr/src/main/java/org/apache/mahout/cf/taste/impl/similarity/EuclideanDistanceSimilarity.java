@@ -59,6 +59,17 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
     Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
   
+  /**
+   * 将欧式距离转换成相似度
+   * 我们知道欧式距离越近,相似度越大,但是要小于1
+   * 
+   * 因此1/大于1的整数,可以表示相似度,分母越大,说明距离越大,说明相似度越小。
+   * 
+   * 由于要结果是小于1的值,因此分母1+x 表示一定分母是大于1的,而不是分数。
+   * 
+   * Math.sqrt(sumXYdiff2) 表示的就是 (x1-y2)^2 +(xn-yn)^2 开根号,即欧式距离
+   * 欧式距离/n 表示平均距离,因为n表示两个user或者item之间有多少个相同的item或者user
+   */
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
     return 1.0 / (1.0 + Math.sqrt(sumXYdiff2) / Math.sqrt(n));

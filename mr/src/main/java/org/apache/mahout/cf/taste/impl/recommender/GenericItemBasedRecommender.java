@@ -65,6 +65,14 @@ import com.google.common.base.Preconditions;
  * {@link org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity} too, which computes
  * similarities in real-time, but will probably find this painfully slow for large amounts of data.
  * </p>
+ * 
+ * 参见GenericUserBasedRecommender
+ * 要找与itemid相似的itemid集合,howMany表示最多找多少个相似的就不找了
+ * 
+ * 该类的逻辑是:
+ * GenericItemBasedRecommender 类逻辑 根据推荐的用户---找到用户喜欢的itemid集合---找到这些itemid相似的哪些itemid进行推荐
+ * 
+ * 而GenericUserBasedRecommender逻辑是 userid--找到相似的userid集合--然后找到相似userid购买了哪些商品--进行推荐
  */
 public class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
   
@@ -122,7 +130,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
-    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);//回该userid对应的一组user-item-value集合,并且按照item排序好了
     if (preferencesFromUser.length() == 0) {
       return Collections.emptyList();
     }
@@ -138,16 +146,18 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return topItems;
   }
   
+  //计算该userid与itemid的偏爱程度
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
-    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
-    Float actualPref = getPreferenceForItem(preferencesFromUser, itemID);
-    if (actualPref != null) {
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);//返回该userid对应的一组user-item-value集合,并且按照item排序好了
+    Float actualPref = getPreferenceForItem(preferencesFromUser, itemID);//看看该user是否原始数据就已经匹配了该item
+    if (actualPref != null) {//直接返回
       return actualPref;
     }
     return doEstimatePreference(userID, preferencesFromUser, itemID);
   }
 
+  //返回真实的item的打分
   private static Float getPreferenceForItem(PreferenceArray preferencesFromUser, long itemID) {
     int size = preferencesFromUser.length();
     for (int i = 0; i < size; i++) {
@@ -228,12 +238,22 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return TopItems.getTopItems(howMany, possibleItemIDs.iterator(), null, estimator);
   }
   
+  /**
+   * 
+   * @param userID 推荐的userid
+   * @param preferencesFromUser userid喜欢什么商品集合
+   * @param itemID 判断userid对该item的喜爱程度
+   * @return 返回喜爱程度
+   * @throws TasteException
+   * 
+   * 即用户的所有item与该item的相似度的均值用于计算
+   */
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
     throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
     int count = 0;
-    double[] similarities = similarity.itemSimilarities(itemID, preferencesFromUser.getIDs());
+    double[] similarities = similarity.itemSimilarities(itemID, preferencesFromUser.getIDs());//返回userid喜欢什么商品集合中与item的相似度
     for (int i = 0; i < similarities.length; i++) {
       double theSimilarity = similarities[i];
       if (!Double.isNaN(theSimilarity)) {

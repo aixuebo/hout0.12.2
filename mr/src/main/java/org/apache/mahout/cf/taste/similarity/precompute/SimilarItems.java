@@ -26,13 +26,17 @@ import java.util.NoSuchElementException;
 
 /**
  * Compact representation of all similar items for an item
+ * 代表一个item和他所有关联的item的相似度集合
  */
 public class SimilarItems {
 
   private final long itemID;
-  private final long[] similarItemIDs;
-  private final double[] similarities;
+  private final long[] similarItemIDs;//跟itemID相关联的item集合
+  private final double[] similarities;//每一个关联的相似度
 
+  /**
+   * @param similarItems 该item拥有相似的item集合
+   */
   public SimilarItems(long itemID, List<RecommendedItem> similarItems) {
     this.itemID = itemID;
 
@@ -50,10 +54,12 @@ public class SimilarItems {
     return itemID;
   }
 
+  //返回跟item相关联的有多少个item
   public int numSimilarItems() {
     return similarItemIDs.length;
   }
 
+  //迭代每一个相关联的item--返回的是item-value
   public Iterable<SimilarItem> getSimilarItems() {
     return new Iterable<SimilarItem>() {
       @Override
@@ -63,6 +69,7 @@ public class SimilarItems {
     };
   }
 
+  //迭代每一个相关联的item--返回的是item-value
   private class SimilarItemsIterator extends UnmodifiableIterator<SimilarItem> {
 
     private int index = -1;

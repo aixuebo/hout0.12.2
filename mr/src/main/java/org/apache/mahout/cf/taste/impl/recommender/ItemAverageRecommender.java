@@ -46,13 +46,15 @@ import com.google.common.base.Preconditions;
  * A simple recommender that always estimates preference for an item to be the average of all known preference
  * values for that item. No information about users is taken into account. This implementation is provided for
  * experimentation; while simple and fast, it may not produce very good recommendations.
+ * 一个简单的推荐算法,总是将所有的item的平均值作为打分
+ * 简单，速度快,但是不是一个好的推荐产品算法
  * </p>
  */
 public final class ItemAverageRecommender extends AbstractRecommender {
   
   private static final Logger log = LoggerFactory.getLogger(ItemAverageRecommender.class);
   
-  private final FastByIDMap<RunningAverage> itemAverages;
+  private final FastByIDMap<RunningAverage> itemAverages;//获取item的平均分数
   private final ReadWriteLock buildAveragesLock;
   private final RefreshHelper refreshHelper;
   

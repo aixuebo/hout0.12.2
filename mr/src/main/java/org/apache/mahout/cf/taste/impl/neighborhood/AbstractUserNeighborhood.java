@@ -31,12 +31,13 @@ import com.google.common.base.Preconditions;
  * <p>
  * Contains methods and resources useful to all classes in this package.
  * </p>
+ * 用于计算一个user的邻居
  */
 abstract class AbstractUserNeighborhood implements UserNeighborhood {
   
-  private final UserSimilarity userSimilarity;
-  private final DataModel dataModel;
-  private final double samplingRate;
+  private final UserSimilarity userSimilarity;//计算user和user之间的相似度
+  private final DataModel dataModel;//全部数据源
+  private final double samplingRate;//在构建邻居的时候,对用户的抽样比例,降低该值,可以提高性能
   private final RefreshHelper refreshHelper;
   
   AbstractUserNeighborhood(UserSimilarity userSimilarity, DataModel dataModel, double samplingRate) {

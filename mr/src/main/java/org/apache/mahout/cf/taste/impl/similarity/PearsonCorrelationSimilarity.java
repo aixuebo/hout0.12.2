@@ -26,17 +26,18 @@ import com.google.common.base.Preconditions;
 /**
  * <p>
  * An implementation of the Pearson correlation. For users X and Y, the following values are calculated:
+ * 实现皮尔逊相关系数算法,计算用户x和y的以下值
  * </p>
  *
  * <ul>
- * <li>sumX2: sum of the square of all X's preference values</li>
- * <li>sumY2: sum of the square of all Y's preference values</li>
+ * <li>sumX2: sum of the square of all X's preference values</li> 用户x所有的相关度的平方和
+ * <li>sumY2: sum of the square of all Y's preference values</li> 用户y所有的相关度的平方和
  * <li>sumXY: sum of the product of X and Y's preference value for all items for which both X and Y express a
- * preference</li>
+ * preference</li> 对于一个item产生的相关度乘积之和
  * </ul>
  *
  * <p>
- * The correlation is then:
+ * The correlation is then: 因此相关度算法是:
  *
  * <p>
  * {@code sumXY / sqrt(sumX2 * sumY2)}

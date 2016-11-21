@@ -28,26 +28,34 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
  * Defines ordering on {@link RecommendedItem} by the rescored value of the recommendations' estimated
  * preference value, from high to low.
  * </p>
+ * 对推荐的商品重新打分,然后进行按照分数排序
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
   
-  private final IDRescorer rescorer;
+	private static final long serialVersionUID = 1L;
+	
+	private final IDRescorer rescorer;//重新打分对象
   
   ByRescoreComparator(IDRescorer rescorer) {
     this.rescorer = rescorer;
   }
   
+  /**
+   * 对比两个推荐的商品,如果可以重新打分,则重新打分,然后按照分数排序
+   */
   @Override
   public int compare(RecommendedItem o1, RecommendedItem o2) {
     double rescored1;
     double rescored2;
-    if (rescorer == null) {
+    if (rescorer == null) {//如果没有设置重新打分对象,则就是原始得分
       rescored1 = o1.getValue();
       rescored2 = o2.getValue();
-    } else {
+    } else {//重新打分
       rescored1 = rescorer.rescore(o1.getItemID(), o1.getValue());
       rescored2 = rescorer.rescore(o2.getItemID(), o2.getValue());
     }
+    
+    //对重新打分后的分数排序
     if (rescored1 < rescored2) {
       return 1;
     } else if (rescored1 > rescored2) {

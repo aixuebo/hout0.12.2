@@ -42,27 +42,31 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   
   /**
    * @throws UnsupportedOperationException
+   * 该计算方法不支持推测计算规则
    */
   @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     throw new UnsupportedOperationException();
   }
   
+  //计算两个user之间的相似度
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
 
     DataModel dataModel = getDataModel();
-    FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
+    FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);//返回该userid对应的一组itemid集合
     FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
     
-    long prefs1Size = prefs1.size();
+    long prefs1Size = prefs1.size();//该user对应多少个item
     long prefs2Size = prefs2.size();
     long intersectionSize =
-        prefs1Size < prefs2Size ? prefs2.intersectionSize(prefs1) : prefs1.intersectionSize(prefs2);
-    if (intersectionSize == 0) {
+        prefs1Size < prefs2Size ? prefs2.intersectionSize(prefs1) : prefs1.intersectionSize(prefs2);//交集数量
+    if (intersectionSize == 0) {//没有交集,则说明两个人是没有相似度的
       return Double.NaN;
     }
-    long numItems = dataModel.getNumItems();
+    
+    long numItems = dataModel.getNumItems();//返回一共多少个itemid
+    
     double logLikelihood =
         LogLikelihood.logLikelihoodRatio(intersectionSize,
                                          prefs2Size - intersectionSize,
@@ -71,6 +75,7 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
   
+  //计算两个item之间的相似度
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     DataModel dataModel = getDataModel();

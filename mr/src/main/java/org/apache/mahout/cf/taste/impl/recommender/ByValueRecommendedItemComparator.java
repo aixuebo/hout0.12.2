@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 /**
  * Defines a natural ordering from most-preferred item (highest value) to least-preferred.
+ * 对推荐的商品按照分数进行排序
  */
 public final class ByValueRecommendedItemComparator implements Comparator<RecommendedItem>, Serializable {
 
