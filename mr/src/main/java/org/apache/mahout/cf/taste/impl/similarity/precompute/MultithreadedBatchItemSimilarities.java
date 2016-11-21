@@ -158,7 +158,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
     if (itemIDBatches.size() < degreeOfParallelism) {
       throw new IllegalStateException("Degree of parallelism [" + degreeOfParallelism + "] " +
-          " is larger than number of batches [" + itemIDBatches.size() +"].");
+              " is larger than number of batches [" + itemIDBatches.size() +"].");
     }
 
     log.info("Queued {} items in {} batches", numItems, itemIDBatches.size());

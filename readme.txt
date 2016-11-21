@@ -1,16 +1,16 @@
-ÍÆ¼öÁ÷³Ì
-/path/to/dataset.csvÎÄ¼şÄÚÈİ
+æ¨èæµç¨‹
+/path/to/dataset.csvæ–‡ä»¶å†…å®¹
 1,10,1.0
 1,11,2.0
 1,12,5.0
 
-DataModel model = new FileDataModel(new File("/path/to/dataset.csv"));//Êı¾İÔ´×é³É¶ÔÏó
-UserSimilarity similarity = new PearsonCorrelationSimilarity(model);//¼ÆËã¸ÃÊı¾İÔ´µÄÏàËÆ¶È,¼´¿ÉÒÔÔ¤¹Àuser-userÖ®¼äµÄÏàËÆ¶È Ò²¿ÉÒÔÔ¤¹Àitem-itemÖ®¼äµÄÏàËÆ¶È  user-itemÖ®¼äµÄÏàËÆ¶È
-UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, model);//¼ÆËãuserµÄÁÚ¾Ó,Õâ¸ö²½ÖèºÜºÄ·ÑĞÔÄÜ
+DataModel model = new FileDataModel(new File("/path/to/dataset.csv"));//æ•°æ®æºç»„æˆå¯¹è±¡
+UserSimilarity similarity = new PearsonCorrelationSimilarity(model);//è®¡ç®—è¯¥æ•°æ®æºçš„ç›¸ä¼¼åº¦,å³å¯ä»¥é¢„ä¼°user-userä¹‹é—´çš„ç›¸ä¼¼åº¦ ä¹Ÿå¯ä»¥é¢„ä¼°item-itemä¹‹é—´çš„ç›¸ä¼¼åº¦  user-itemä¹‹é—´çš„ç›¸ä¼¼åº¦
+UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, model);//è®¡ç®—userçš„é‚»å±…,è¿™ä¸ªæ­¥éª¤å¾ˆè€—è´¹æ€§èƒ½
 UserBasedRecommender recommender = new GenericUserBasedRecommender(model, neighborhood, similarity);
-List recommendations = recommender.recommend(2, 3);//ÎªuseridÎª2µÄÍÆ¼öÉÌÆ·,×î¶àÍÆ¼ö3¸öÉÌÆ·
+List recommendations = recommender.recommend(2, 3);//ä¸ºuseridä¸º2çš„æ¨èå•†å“,æœ€å¤šæ¨è3ä¸ªå•†å“
 for (RecommendedItem recommendation : recommendations) {
-  System.out.println(recommendation);//´òÓ¡ÍÆ¼öµÄÉÌÆ·idÒÔ¼°¶ÔÓ¦µÄ´ò·Övalue
+  System.out.println(recommendation);//æ‰“å°æ¨èçš„å•†å“idä»¥åŠå¯¹åº”çš„æ‰“åˆ†value
 }
 
 
