@@ -25,15 +25,16 @@ import org.apache.mahout.classifier.df.data.Instance;
 @Deprecated
 public class Equals extends Condition {
   
-  private final int attr;
+  private final int attr;//第几个属性index
   
-  private final double value;
+  private final double value;//校验值
   
   public Equals(int attr, double value) {
     this.attr = attr;
     this.value = value;
   }
   
+  //只要一个数据该属性=value,都返回true
   @Override
   public boolean isTrueFor(Instance instance) {
     return instance.get(attr) == value;

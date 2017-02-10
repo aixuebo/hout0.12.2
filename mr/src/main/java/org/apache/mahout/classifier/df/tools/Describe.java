@@ -46,6 +46,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Generates a file descriptor for a given dataset
+ * 通过输入路径以及字段的描述,来确定Dataset对象.并且将该对象以json格式存储到输出路径中
+ * 
+ * 程序的入口
+ * $MAHOUT_HOME/core/target/mahout-core--job.jar org.apache.mahout.classifier.df.tools.Describe -p testdata/KDDTrain+.arff -f testdata/KDDTrain+.info -d N 3 C 2 N C 4 N C 8 N 2 C 19 N L
  */
 public final class Describe implements Tool {
 
@@ -64,15 +68,15 @@ public final class Describe implements Tool {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option pathOpt = obuilder.withLongName("path").withShortName("p").withRequired(true).withArgument(
-        abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
+        abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();//输入目录
 
     Option descriptorOpt = obuilder.withLongName("descriptor").withShortName("d").withRequired(true)
         .withArgument(abuilder.withName("descriptor").withMinimum(1).create()).withDescription(
-            "data descriptor").create();
+            "data descriptor").create();//获取每一个title的数据类型等信息   3 N I N N 2 C L 5 I
 
     Option descPathOpt = obuilder.withLongName("file").withShortName("f").withRequired(true).withArgument(
         abuilder.withName("file").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Path to generated descriptor file").create();
+        "Path to generated descriptor file").create();//输出目录,存储数据类型Dataset
 
     Option regOpt = obuilder.withLongName("regression").withDescription("Regression Problem").withShortName("r")
         .create();
@@ -114,16 +118,16 @@ public final class Describe implements Tool {
   private void runTool(String dataPath, Iterable<String> description, String filePath, boolean regression)
     throws DescriptorException, IOException {
     log.info("Generating the descriptor...");
-    String descriptor = DescriptorUtils.generateDescriptor(description);
+    String descriptor = DescriptorUtils.generateDescriptor(description);//获取每一个title的数据类型等信息
 
-    Path fPath = validateOutput(filePath);
+    Path fPath = validateOutput(filePath);//校验输出目录
 
     log.info("generating the dataset...");
-    Dataset dataset = generateDataset(descriptor, dataPath, regression);
+    Dataset dataset = generateDataset(descriptor, dataPath, regression);//加载dataPath路径下的数据集
 
     log.info("storing the dataset description");
     String json = dataset.toJSON();
-    DFUtils.storeString(conf, fPath, json);
+    DFUtils.storeString(conf, fPath, json);//数据集合存储到输出路径内
   }
 
   private Dataset generateDataset(String descriptor, String dataPath, boolean regression) throws IOException,

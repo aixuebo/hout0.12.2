@@ -31,20 +31,21 @@ import java.io.IOException;
 public abstract class Node implements Writable {
   
   protected enum Type {
-    LEAF,
-    NUMERICAL,
-    CATEGORICAL
+    LEAF,//叶子节点,即真正的label了
+    NUMERICAL,//数字形式
+    CATEGORICAL//类别形式,即离散的分类中选择一个
   }
   
   /**
    * predicts the label for the instance
+   * 预测该实例的一个label
    * 
-   * @return -1 if the label cannot be predicted
+   * @return -1 if the label cannot be predicted,-1说明这个实例不能被预测一个label
    */
   public abstract double classify(Instance instance);
   
   /**
-   * @return the total number of nodes of the tree
+   * @return the total number of nodes of the tree 返回该节点组成的树一共包括自己 有多少个节点
    */
   public abstract long nbNodes();
   
@@ -87,10 +88,11 @@ public abstract class Node implements Writable {
   
   @Override
   public final void write(DataOutput out) throws IOException {
-    out.writeInt(getType().ordinal());
+    out.writeInt(getType().ordinal());//写入Node类型
     writeNode(out);
   }
   
+  //具体怎么为Node赋值,让子类去自己实现
   protected abstract void writeNode(DataOutput out) throws IOException;
   
 }

@@ -28,9 +28,9 @@ import java.util.Arrays;
 @Deprecated
 public class CategoricalNode extends Node {
 
-  private int attr;
-  private double[] values;
-  private Node[] childs;
+  private int attr;//该属性属于向量的第几个属性
+  private double[] values;//分类标签对应的数字
+  private Node[] childs;//每一个分类对应的子节点
   
   public CategoricalNode() {
   }
@@ -43,14 +43,15 @@ public class CategoricalNode extends Node {
   
   @Override
   public double classify(Instance instance) {
-    int index = ArrayUtils.indexOf(values, instance.get(attr));
+    int index = ArrayUtils.indexOf(values, instance.get(attr));//在values中查找 instance.get(attr)对应的位置
     if (index == -1) {
       // value not available, we cannot predict
       return Double.NaN;
     }
-    return childs[index].classify(instance);
+    return childs[index].classify(instance);//获取一个分类,到一个分类下进一步计算
   }
   
+  //最大深度就是1+子类中最大的深度
   @Override
   public long maxDepth() {
     long max = 0;
@@ -66,7 +67,7 @@ public class CategoricalNode extends Node {
   }
   
   @Override
-  public long nbNodes() {
+  public long nbNodes() {//该节点组成的tree,包括自己有多少个节点
     long nbNodes = 1;
     
     for (Node child : childs) {

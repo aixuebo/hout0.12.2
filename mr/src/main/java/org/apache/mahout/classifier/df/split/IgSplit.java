@@ -21,14 +21,16 @@ import org.apache.mahout.classifier.df.data.Data;
 
 /**
  * Computes the best split using the Information Gain measure
+ * 使用信息增益测量,去计算最好的拆分方式
  */
 @Deprecated
 public abstract class IgSplit {
   
-  static final double LOG2 = Math.log(2.0);
+  static final double LOG2 = Math.log(2.0);//0.6931471805599453 ,即0.6931471805599453的2次方=e
   
   /**
    * Computes the best split for the given attribute
+   * 给定一个属性.计算该属性中哪个值对应的信息增益最大
    */
   public abstract Split computeSplit(Data data, int attr);
   

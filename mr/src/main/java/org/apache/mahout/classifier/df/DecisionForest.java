@@ -38,6 +38,7 @@ import java.util.Random;
 
 /**
  * Represents a forest of decision trees.
+ * 代表一个森林决策树,即决策森林
  */
 @Deprecated
 public class DecisionForest implements Writable {

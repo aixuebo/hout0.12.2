@@ -90,5 +90,4 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
     }
     return sumXY / denominator;
   }
-  
 }

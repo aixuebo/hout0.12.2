@@ -25,11 +25,12 @@ import java.util.regex.Pattern;
 
 /**
  * Converts String to Instance using a Dataset
+ * 数据原始内容,将数据原始内容转换成记录对象Instance
  */
 @Deprecated
 public class DataConverter {
 
-  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");//数据按照逗号拆分
 
   private final Dataset dataset;
 
@@ -37,6 +38,7 @@ public class DataConverter {
     this.dataset = dataset;
   }
 
+  //数据原始内容,将数据原始内容转换成记录对象Instance
   public Instance convert(CharSequence string) {
     // all attributes (categorical, numerical, label), ignored
     int nball = dataset.nbAttributes() + dataset.getIgnored().length;
@@ -46,22 +48,22 @@ public class DataConverter {
         "Wrong number of attributes in the string: " + tokens.length + ". Must be " + nball);
 
     int nbattrs = dataset.nbAttributes();
-    DenseVector vector = new DenseVector(nbattrs);
+    DenseVector vector = new DenseVector(nbattrs);//转换成有效的属性向量
 
     int aId = 0;
     for (int attr = 0; attr < nball; attr++) {
-      if (!ArrayUtils.contains(dataset.getIgnored(), attr)) {
-        String token = tokens[attr].trim();
+      if (!ArrayUtils.contains(dataset.getIgnored(), attr)) {//不要忽略的属性
+        String token = tokens[attr].trim();//属性值
 
-        if ("?".equals(token)) {
+        if ("?".equals(token)) {//如果是失效的,则返回null
           // missing value
           return null;
         }
 
         if (dataset.isNumerical(aId)) {
-          vector.set(aId++, Double.parseDouble(token));
+          vector.set(aId++, Double.parseDouble(token));//设置该属性值
         } else { // CATEGORICAL
-          vector.set(aId, dataset.valueOf(aId, token));
+          vector.set(aId, dataset.valueOf(aId, token));//设置该属性对应的序号
           aId++;
         }
       }

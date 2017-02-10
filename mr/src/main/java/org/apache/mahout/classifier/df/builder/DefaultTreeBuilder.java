@@ -50,6 +50,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
 
   /**
    * indicates which CATEGORICAL attributes have already been selected in the parent nodes
+   * 每一个属性对应一个位置,true表示该位置是分类或者label属性
    */
   private boolean[] selected;
   /**
@@ -69,47 +70,48 @@ public class DefaultTreeBuilder implements TreeBuilder {
     this.m = m;
   }
 
+  //根据数据的信息熵,将数据生成树
   @Override
   public Node build(Random rng, Data data) {
 
     if (selected == null) {
       selected = new boolean[data.getDataset().nbAttributes()];
-      selected[data.getDataset().getLabelId()] = true; // never select the label
+      selected[data.getDataset().getLabelId()] = true; // never select the label设置label肯定是分类属性
     }
 
     if (data.isEmpty()) {
       return new Leaf(-1);
     }
-    if (isIdentical(data)) {
+    if (isIdentical(data)) {//说明数据都一样
       return new Leaf(data.majorityLabel(rng));
     }
-    if (data.identicalLabel()) {
+    if (data.identicalLabel()) {//说明lable都一样,即就一个分类标签结果
       return new Leaf(data.getDataset().getLabel(data.get(0)));
     }
 
-    int[] attributes = randomAttributes(rng, selected, m);
+    int[] attributes = randomAttributes(rng, selected, m);//随机选择m个属性,返回这次选择的属性index集合
     if (attributes == null || attributes.length == 0) {
       // we tried all the attributes and could not split the data anymore
       return new Leaf(data.majorityLabel(rng));
     }
 
     // find the best split
-    Split best = null;
+    Split best = null;//计算最好的属性
     for (int attr : attributes) {
-      Split split = igSplit.computeSplit(data, attr);
-      if (best == null || best.getIg() < split.getIg()) {
+      Split split = igSplit.computeSplit(data, attr);//计算每一个属性最好的value是什么时候获取的熵
+      if (best == null || best.getIg() < split.getIg()) {//设置最好的熵是哪个属性
         best = split;
       }
     }
 
-    boolean alreadySelected = selected[best.getAttr()];
+    boolean alreadySelected = selected[best.getAttr()];//true表示最好的属性已经选择了
     if (alreadySelected) {
       // attribute already selected
       log.warn("attribute {} already selected in a parent node", best.getAttr());
     }
 
     Node childNode;
-    if (data.getDataset().isNumerical(best.getAttr())) {
+    if (data.getDataset().isNumerical(best.getAttr())) {//最好的属性是数值类型的
       boolean[] temp = null;
 
       Data loSubset = data.subset(Condition.lesser(best.getAttr(), best.getSplit()));
@@ -135,7 +137,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       }
 
       childNode = new NumericalNode(best.getAttr(), best.getSplit(), loChild, hiChild);
-    } else { // CATEGORICAL attribute
+    } else { // CATEGORICAL attribute 最好的属性是分类类型的
       selected[best.getAttr()] = true;
 
       double[] values = data.values(best.getAttr());
@@ -202,9 +204,9 @@ public class DefaultTreeBuilder implements TreeBuilder {
    * Randomly selects m attributes to consider for split, excludes IGNORED and LABEL attributes
    *
    * @param rng      random-numbers generator
-   * @param selected attributes' state (selected or not)
-   * @param m        number of attributes to choose
-   * @return list of selected attributes' indices, or null if all attributes have already been selected
+   * @param selected attributes' state (selected or not) 位置为true表示已经选择了
+   * @param m        number of attributes to choose 要继续选择m个属性
+   * @return list of selected attributes' indices, or null if all attributes have already been selected 返回这次选择的属性index集合
    */
   protected static int[] randomAttributes(Random rng, boolean[] selected, int m) {
     int nbNonSelected = 0; // number of non selected attributes
@@ -220,7 +222,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
 
     int[] result;
-    if (nbNonSelected <= m) {
+    if (nbNonSelected <= m) {//要去选择M个,发现没选择的比M要小.因此全部将没选择的作为选择处理
       // return all non selected attributes
       result = new int[nbNonSelected];
       int index = 0;
@@ -230,20 +232,20 @@ public class DefaultTreeBuilder implements TreeBuilder {
         }
       }
     } else {
-      result = new int[m];
+      result = new int[m];//选择M个没有选择的值
       for (int index = 0; index < m; index++) {
         // randomly choose a "non selected" attribute
         int rind;
         do {
-          rind = rng.nextInt(selected.length);
-        } while (selected[rind]);
+          rind = rng.nextInt(selected.length);//随机产生一个位置
+        } while (selected[rind]);//一直到该位置为false,则退出
 
         result[index] = rind;
-        selected[rind] = true; // temporarily set the chosen attribute to be selected
+        selected[rind] = true; // temporarily set the chosen attribute to be selected  暂时将其设置为选择
       }
 
       // the chosen attributes are not yet selected
-      for (int attr : result) {
+      for (int attr : result) {//因为已经暂时将没选择的设置为选择了,因此要重新设置成没选择
         selected[attr] = false;
       }
     }

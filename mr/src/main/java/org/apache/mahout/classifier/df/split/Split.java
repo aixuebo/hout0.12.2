@@ -21,13 +21,14 @@ import java.util.Locale;
 
 /**
  * Contains enough information to identify each split
+ * 一个属性的信息增益信息
  */
 @Deprecated
 public final class Split {
   
-  private final int attr;
-  private final double ig;
-  private final double split;
+  private final int attr;//属性序号
+  private final double ig;//最好的split时候,真实值作为参数 得到的ig分数,即信息增益
+  private final double split;//最好的split时候,是什么真实的值
   
   public Split(int attr, double ig, double split) {
     this.attr = attr;

@@ -33,9 +33,9 @@ import java.util.Random;
 @Deprecated
 public class Data implements Cloneable {
   
-  private final List<Instance> instances;
+  private final List<Instance> instances;//数据内容
   
-  private final Dataset dataset;
+  private final Dataset dataset;//数据集合.表示数据的title等信息描述
 
   public Data(Dataset dataset) {
     this.dataset = dataset;
@@ -98,8 +98,11 @@ public class Data implements Cloneable {
     return new Data(dataset, subset);
   }
 
-    /**
-   * if data has N cases, sample N cases at random -but with replacement.
+   /**
+   * if data has N cases, sample N cases at random -but with replacement.可能有代替
+   * 即对原始的数据内容进行打乱顺序,比如原来有100条记录,最终结果是随机产生100条记录,这100条记录可能是有重复的数据
+   * 
+   * 抽样数据
    */
   public Data bagging(Random rng) {
     int datasize = size();
@@ -116,9 +119,10 @@ public class Data implements Cloneable {
    * if data has N cases, sample N cases at random -but with replacement.
    * 
    * @param sampled
-   *          indicating which instance has been sampled
+   *          indicating which instance has been sampled 数组用于表示哪些数据被抽样带走了,true表示被抽样带走了
    * 
    * @return sampled data
+   * 抽样数据
    */
   public Data bagging(Random rng, boolean[] sampled) {
     int datasize = size();
@@ -135,6 +139,7 @@ public class Data implements Cloneable {
   
   /**
    * Splits the data in two, returns one part, and this gets the rest of the data. <b>VERY SLOW!</b>
+   * 非常慢的操作,会将数据拆分成两组,这个函数选择抽取出subsize个数据
    */
   public Data rsplit(Random rng, int subsize) {
     List<Instance> subset = new ArrayList<>(subsize);
@@ -151,6 +156,7 @@ public class Data implements Cloneable {
    * 
    * @return true is all the vectors are identical or the data is empty<br>
    *         false otherwise
+   * true表示所有的数据有相同的内容
    */
   public boolean isIdentical() {
     if (isEmpty()) {
@@ -158,8 +164,8 @@ public class Data implements Cloneable {
     }
     
     Instance instance = get(0);
-    for (int attr = 0; attr < dataset.nbAttributes(); attr++) {
-      for (int index = 1; index < size(); index++) {
+    for (int attr = 0; attr < dataset.nbAttributes(); attr++) {//循环每一个属性
+      for (int index = 1; index < size(); index++) {//针对每一个属性,都判断所有元素是否在该属性上有相同的数据
         if (get(index).get(attr) != instance.get(attr)) {
           return false;
         }
@@ -171,6 +177,7 @@ public class Data implements Cloneable {
   
   /**
    * checks if all the vectors have identical label values
+   * true表示所有的数据对应的标签都是相同的,即只有一个标签内容
    */
   public boolean identicalLabel() {
     if (isEmpty()) {
@@ -189,12 +196,13 @@ public class Data implements Cloneable {
   
   /**
    * finds all distinct values of a given attribute
+   * 获取给定属性的值---过滤重复
    */
   public double[] values(int attr) {
-    Collection<Double> result = new HashSet<>();
+    Collection<Double> result = new HashSet<>();//不重复的Set
     
     for (Instance instance : instances) {
-      result.add(instance.get(attr));
+      result.add(instance.get(attr));//将每一条记录对应该属性的值添加到set中
     }
     
     double[] values = new double[result.size()];
@@ -233,9 +241,10 @@ public class Data implements Cloneable {
   
   /**
    * extract the labels of all instances
+   * 抽取所有数据中标签这一列
    */
   public double[] extractLabels() {
-    double[] labels = new double[size()];
+    double[] labels = new double[size()];//所有数据,每一个数据对应的标签内容
     
     for (int index = 0; index < labels.length; index++) {
       labels[index] = dataset.getLabel(get(index));
@@ -249,17 +258,18 @@ public class Data implements Cloneable {
    * This method can be used when the criterion variable is the categorical attribute.
    *
    * @return the majority label value
+   * 找出主要的标签所在index
    */
   public int majorityLabel(Random rng) {
     // count the frequency of each label value
-    int[] counts = new int[dataset.nblabels()];
+    int[] counts = new int[dataset.nblabels()];//计算每一个标签对应多少条数据
     
     for (int index = 0; index < size(); index++) {
       counts[(int) dataset.getLabel(get(index))]++;
     }
     
     // find the label values that appears the most
-    return DataUtils.maxindex(rng, counts);
+    return DataUtils.maxindex(rng, counts);//找到标签数据最多的标签所在index
   }
   
   /**
@@ -268,6 +278,7 @@ public class Data implements Cloneable {
    * 
    * @param counts
    *          will contain the results, supposed to be initialized at 0
+   * 计算每一个标签对应多少条数据
    */
   public void countLabels(int[] counts) {
     for (int index = 0; index < size(); index++) {

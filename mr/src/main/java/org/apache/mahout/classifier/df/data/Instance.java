@@ -21,11 +21,12 @@ import org.apache.mahout.math.Vector;
 
 /**
  * Represents one data instance.
+ * 即一条记录,就是一个向量
  */
 @Deprecated
 public class Instance {
   
-  /** attributes, except LABEL and IGNORED */
+  /** attributes, except LABEL and IGNORED 没有label的属性信息 */
   private final Vector attrs;
   
   public Instance(Vector attrs) {
@@ -38,6 +39,7 @@ public class Instance {
    * @param index
    *          position of the attribute to retrieve
    * @return value of the attribute
+   * 获取向量第index个位置的值---属性值当是分类的时候,也要转换成具体数字,不能有中文
    */
   public double get(int index) {
     return attrs.getQuick(index);

@@ -30,7 +30,7 @@ import java.util.Locale;
 @Deprecated
 public final class DescriptorUtils {
 
-  private static final Splitter SPACE = Splitter.on(' ').omitEmptyStrings();
+  private static final Splitter SPACE = Splitter.on(' ').omitEmptyStrings();//按照空格拆分
 
   private DescriptorUtils() { }
   
@@ -39,6 +39,7 @@ public final class DescriptorUtils {
    * 
    * @throws DescriptorException
    *           if a bad token is encountered
+   * 从字符串中解析每一个字段的属性性质
    */
   public static Attribute[] parseDescriptor(CharSequence descriptor) throws DescriptorException {
     List<Attribute> attributes = new ArrayList<>();
@@ -64,6 +65,7 @@ public final class DescriptorUtils {
    * for example "3 N I N N 2 C L 5 I" generates "N N N I N N C C L I I I I I".<br>
    * this useful when describing datasets with a large number of attributes
    * @throws DescriptorException
+   * 将3 N I N N 2 C L 5 I 转换成N N N I N N C C L I I I I I,即重复的字母用数字代替
    */
   public static String generateDescriptor(CharSequence description) throws DescriptorException {
     return generateDescriptor(SPACE.split(description));
@@ -72,6 +74,7 @@ public final class DescriptorUtils {
   /**
    * Generates a valid descriptor string from a list of tokens
    * @throws DescriptorException
+   * 先获取一个数字.然后获取一个字符,然后字符循环数字次数
    */
   public static String generateDescriptor(Iterable<String> tokens) throws DescriptorException {
     StringBuilder descriptor = new StringBuilder();

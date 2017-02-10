@@ -45,6 +45,7 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] += array2[i]
+   * 两个数字对应相同index位置的元素进行相加
    */
   public static void add(int[] array1, int[] array2) {
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
@@ -55,6 +56,7 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] -= array2[i]
+   * 两个数字对应相同index位置的元素进行相减
    */
   public static void dec(int[] array1, int[] array2) {
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
@@ -69,10 +71,11 @@ public final class DataUtils {
    * @param rng
    *          used to break ties
    * @return index of the maximum
+   * 找到values中最大值的index位置,当相同的最大值有多个的时候,随机产生一个位置即可
    */
   public static int maxindex(Random rng, int[] values) {
-    int max = 0;
-    List<Integer> maxindices = new ArrayList<>();
+    int max = 0;//最大值
+    List<Integer> maxindices = new ArrayList<>();//最大值的index下标.因为可能有多个相同的最大值
     
     for (int index = 0; index < values.length; index++) {
       if (values[index] > max) {

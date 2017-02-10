@@ -28,11 +28,11 @@ import java.io.IOException;
  */
 @Deprecated
 public class NumericalNode extends Node {
-  /** numerical attribute to split for */
+  /** numerical attribute to split for 该属性属于向量的第几个属性 */
   private int attr;
   
   /** split value */
-  private double split;
+  private double split;//该属性在最好的split时候,是什么真实的值
   
   /** child node when attribute's value < split value */
   private Node loChild;
@@ -60,12 +60,12 @@ public class NumericalNode extends Node {
   
   @Override
   public long maxDepth() {
-    return 1 + Math.max(loChild.maxDepth(), hiChild.maxDepth());
+    return 1 + Math.max(loChild.maxDepth(), hiChild.maxDepth()); //最大深度就是本身+左或者右最深的深度,递归的思想就是定义好接口.别管别人怎么实现的,他肯定能实现就好,不操心
   }
   
   @Override
   public long nbNodes() {
-    return 1 + loChild.nbNodes() + hiChild.nbNodes();
+    return 1 + loChild.nbNodes() + hiChild.nbNodes(); //返回该节点组成的树一共包括自己 有多少个节点,因此要包括自己,所以最开始1+
   }
   
   @Override

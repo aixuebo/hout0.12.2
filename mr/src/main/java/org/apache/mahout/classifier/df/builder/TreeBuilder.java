@@ -34,8 +34,9 @@ public interface TreeBuilder {
    * @param rng
    *          random-numbers generator
    * @param data
-   *          training data
+   *          training data 训练数据内容
    * @return root Node
+   * 给定训练数据内容,产生决策树
    */
   Node build(Random rng, Data data);
   

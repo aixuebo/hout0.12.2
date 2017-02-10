@@ -31,6 +31,7 @@ public abstract class Condition {
    * @param instance
    *          checked instance
    * @return true is the checked instance matches the condition
+   * 只要一个数据该属性符合校验规则,都返回true
    */
   public abstract boolean isTrueFor(Instance instance);
   
