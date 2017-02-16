@@ -32,7 +32,7 @@ public final class DataUtils {
   
   /**
    * Computes the sum of the values
-   * 
+   * 计算参数的和
    */
   public static int sum(int[] values) {
     int sum = 0;
@@ -45,7 +45,7 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] += array2[i]
-   * 两个数字对应相同index位置的元素进行相加
+   * 将array2对应index的值,追加到array1中
    */
   public static void add(int[] array1, int[] array2) {
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
@@ -56,7 +56,7 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] -= array2[i]
-   * 两个数字对应相同index位置的元素进行相减
+   * 将array2对应index的值,从array1中减去
    */
   public static void dec(int[] array1, int[] array2) {
     Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");

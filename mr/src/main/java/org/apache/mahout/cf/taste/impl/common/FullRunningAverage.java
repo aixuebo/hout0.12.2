@@ -26,6 +26,7 @@ import java.io.Serializable;
  * series of values, just its running average, so it doesn't even matter if you remove/change a value that
  * wasn't added.
  * </p>
+ * 计算数量和平均值
  */
 public class FullRunningAverage implements RunningAverage, Serializable {
   

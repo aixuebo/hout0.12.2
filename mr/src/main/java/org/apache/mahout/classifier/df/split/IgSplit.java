@@ -30,7 +30,8 @@ public abstract class IgSplit {
   
   /**
    * Computes the best split for the given attribute
-   * 给定一个属性.计算该属性中哪个值对应的信息增益最大
+   * 给定一个属性.计算该属性的信息增益
+   * 如果属性是数值类型的时候,还要获取哪个值对应的信息增益最大
    */
   public abstract Split computeSplit(Data data, int attr);
   
