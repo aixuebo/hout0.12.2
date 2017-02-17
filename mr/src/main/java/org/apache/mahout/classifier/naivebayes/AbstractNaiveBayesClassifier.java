@@ -27,6 +27,7 @@ import org.apache.mahout.math.Vector.Element;
  * {@code classifyScalar}. The reason that these two methods are not
  * supported is because the scores computed by a NaiveBayesClassifier do not
  * represent probabilities.
+ * 朴素贝叶斯方法
  */
 public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
 

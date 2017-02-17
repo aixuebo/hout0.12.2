@@ -48,20 +48,20 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   private static final Logger log = LoggerFactory.getLogger(Step1Mapper.class);
   
   /** used to convert input values to data instances */
-  private DataConverter converter;
+  private DataConverter converter;//如何将String类型的内容转换成instances对象
   
   private Random rng;
   
-  /** number of trees to be built by this mapper */
+  /** number of trees to be built by this mapper 这个map要产生多少颗决策树*/
   private int nbTrees;
   
-  /** id of the first tree */
+  /** id of the first tree 第一课决策树的id*/
   private int firstTreeId;
   
-  /** mapper's partition */
+  /** mapper's partition 当前是第几个partition对应的map*/
   private int partition;
   
-  /** will contain all instances if this mapper's split */
+  /** will contain all instances if this mapper's split 该map要处理的所有数据集合,即在该集合内创建了若干个决策树*/
   private final List<Instance> instances = new ArrayList<>();
   
   public int getFirstTreeId() {
@@ -108,7 +108,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     // compute first tree id
     firstTreeId = 0;
     for (int p = 0; p < partition; p++) {
-      firstTreeId += nbTrees(numMapTasks, numTrees, p);
+      firstTreeId += nbTrees(numMapTasks, numTrees, p);//计算当前partition前应该已经有多少个决策树了,因此知道了本节点的map应该从第几颗决策树开始
     }
     
     log.debug("partition : {}", partition);
@@ -119,23 +119,23 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   /**
    * Compute the number of trees for a given partition. The first partitions may be longer
    * than the rest because of the remainder.
-   * 
+   * 计算该map上要产生多少个决策树
    * @param numMaps
-   *          total number of maps (partitions)
+   *          total number of maps (partitions) 总共有多少个map任务
    * @param numTrees
-   *          total number of trees to build
+   *          total number of trees to build 总共要产生多少颗决策树
    * @param partition
-   *          partition to compute the number of trees for
+   *          partition to compute the number of trees for 当前是第几个partition
    */
   public static int nbTrees(int numMaps, int numTrees, int partition) {
-    int treesPerMapper = numTrees / numMaps;
-    int remainder = numTrees - numMaps * treesPerMapper;
-    return treesPerMapper + (partition < remainder ? 1 : 0);
+    int treesPerMapper = numTrees / numMaps;//计算每个map上应该有多少颗决策树
+    int remainder = numTrees - numMaps * treesPerMapper;//剩余多少颗决策树不能被分配到map中
+    return treesPerMapper + (partition < remainder ? 1 : 0);//将前几个partition中多分配一个多余的决策树
   }
   
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-    instances.add(converter.convert(value.toString()));
+    instances.add(converter.convert(value.toString()));//将value的字符串转换成Instance对象
   }
   
   @Override
@@ -143,7 +143,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     // prepare the data
     log.debug("partition: {} numInstances: {}", partition, instances.size());
     
-    Data data = new Data(getDataset(), instances);
+    Data data = new Data(getDataset(), instances);//组装成统计的数据源集合
     Bagging bagging = new Bagging(getTreeBuilder(), data);
     
     TreeID key = new TreeID();
@@ -152,13 +152,13 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       log.debug("Building tree number : {}", treeId);
       
-      Node tree = bagging.build(rng);
+      Node tree = bagging.build(rng);//产生一颗决策树
       
-      key.set(partition, firstTreeId + treeId);
+      key.set(partition, firstTreeId + treeId);//为该决策树分配一个ID,
       
       if (isOutput()) {
         MapredOutput emOut = new MapredOutput(tree);
-        context.write(key, emOut);
+        context.write(key, emOut);//key就是决策树的ID,value是决策树内容
       }
 
       context.progress();

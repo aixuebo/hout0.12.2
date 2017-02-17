@@ -45,16 +45,18 @@ import java.util.Comparator;
  * <li>DecisionForest parseOutput(Job, PredictionCallback) : in order to convert the job outputs into a
  * DecisionForest and its corresponding oob predictions</li>
  * </ul>
+ * 对一个数据title和数据内容进行构建一颗决策树组成的决策森林--由build方法构建
  * 
+ * 具体实现类在inmen和partial包下实现
  */
 @Deprecated
 public abstract class Builder {
   
   private static final Logger log = LoggerFactory.getLogger(Builder.class);
   
-  private final TreeBuilder treeBuilder;
-  private final Path dataPath;
-  private final Path datasetPath;
+  private final TreeBuilder treeBuilder;//构建的决策树
+  private final Path dataPath;//数据路径
+  private final Path datasetPath;//数据title
   private final Long seed;
   private final Configuration conf;
   private String outputDirName = "output";
@@ -89,6 +91,7 @@ public abstract class Builder {
    * @param conf
    *          configuration
    * @return true if the builder has to return output. false otherwise
+   * 将job的输出转换成决策树森林对象
    */
   protected static boolean isOutput(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.output", true);
@@ -137,7 +140,7 @@ public abstract class Builder {
   
   /**
    * Get the number of trees for the map-reduce job.
-   * 
+   * 构建多少个决策树,因为要组成决策森林
    * @param conf
    *          configuration
    * @return number of trees to build
@@ -148,7 +151,7 @@ public abstract class Builder {
   
   /**
    * Set the number of trees to grow for the map-reduce job
-   * 
+   * 构建多少个决策树,因为要组成决策森林
    * @param conf
    *          configuration
    * @param nbTrees
@@ -194,7 +197,7 @@ public abstract class Builder {
    * @param conf
    *          configuration
    * @param index
-   *          index of the path in the DistributedCache files
+   *          index of the path in the DistributedCache files 获取第几个文件
    * @return path from the DistributedCache
    * @throws IOException
    *           if no path is found
@@ -218,6 +221,7 @@ public abstract class Builder {
    * @throws IOException
    *           if we cannot retrieve the Dataset path from the DistributedCache, or the Dataset could not be
    *           loaded
+   * 加载数据title---文件就一个.因此获取第0个文件
    */
   public static Dataset loadDataset(Configuration conf) throws IOException {
     Path datasetPath = getDistributedCacheFile(conf, 0);
@@ -249,7 +253,7 @@ public abstract class Builder {
   
   /**
    * Parse the output files to extract the trees and pass the predictions to the callback
-   * 
+   * 解析job的输出文件,抽取树的构造内容,转换成决策森林对象
    * @param job
    *          Hadoop's job
    * @return Built DecisionForest
@@ -258,6 +262,7 @@ public abstract class Builder {
    */
   protected abstract DecisionForest parseOutput(Job job) throws IOException;
   
+  //构建决策森林
   public DecisionForest build(int nbTrees)
     throws IOException, ClassNotFoundException, InterruptedException {
     // int numTrees = getNbTrees(conf);
@@ -277,7 +282,7 @@ public abstract class Builder {
     setTreeBuilder(conf, treeBuilder);
     
     // put the dataset into the DistributedCache
-    DistributedCache.addCacheFile(datasetPath.toUri(), conf);
+    DistributedCache.addCacheFile(datasetPath.toUri(), conf);//添加数据title
     
     Job job = new Job(conf, "decision forest builder");
     
@@ -303,7 +308,7 @@ public abstract class Builder {
   /**
    * sort the splits into order based on size, so that the biggest go first.<br>
    * This is the same code used by Hadoop's JobClient.
-   * 
+   * 该文件大小排序,大的文件在前面
    * @param splits
    *          input splits
    */

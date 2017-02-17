@@ -58,13 +58,19 @@ public class FrequenciesJob {
   
   private static final Logger log = LoggerFactory.getLogger(FrequenciesJob.class);
   
-  /** directory that will hold this job's output */
+  /** directory that will hold this job's output 
+   * 该job的输出目录
+   **/
   private final Path outputPath;
   
-  /** file that contains the serialized dataset */
+  /** file that contains the serialized dataset 
+   * 数据的title路径
+   **/
   private final Path datasetPath;
   
-  /** directory that contains the data used in the first step */
+  /** directory that contains the data used in the first step 
+   * 数据的内容路径
+   **/
   private final Path dataPath;
   
   /**
@@ -117,7 +123,7 @@ public class FrequenciesJob {
       throw new IllegalStateException("Job failed!");
     }
     
-    int[][] counts = parseOutput(job);
+    int[][] counts = parseOutput(job); //返回每一个partition,一个数组.数组内容是该数组下每一个标签有多少条数据
 
     HadoopUtil.delete(conf, outputPath);
     
@@ -165,10 +171,10 @@ public class FrequenciesJob {
    */
   private static class FrequenciesMapper extends Mapper<LongWritable,Text,LongWritable,IntWritable> {
     
-    private LongWritable firstId;
+    private LongWritable firstId;//主要让key是相同的,这样在reduce中所有的key都是一样的
     
-    private DataConverter converter;
-    private Dataset dataset;
+    private DataConverter converter;//如何将字符串的数据转换成Instance对象
+    private Dataset dataset;//数据title
     
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -194,14 +200,14 @@ public class FrequenciesJob {
       
       Instance instance = converter.convert(value.toString());
       
-      context.write(firstId, new IntWritable((int) dataset.getLabel(instance)));
+      context.write(firstId, new IntWritable((int) dataset.getLabel(instance)));//该实例对应的标签
     }
     
   }
   
   private static class FrequenciesReducer extends Reducer<LongWritable,IntWritable,LongWritable,Frequencies> {
     
-    private int nblabels;
+    private int nblabels;//返回有多少个label属性
     
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -220,7 +226,7 @@ public class FrequenciesJob {
     @Override
     protected void reduce(LongWritable key, Iterable<IntWritable> values, Context context)
       throws IOException, InterruptedException {
-      int[] counts = new int[nblabels];
+      int[] counts = new int[nblabels];//每一个标签对应一个int值,即有多少条数据表示了该标签
       for (IntWritable value : values) {
         counts[value.get()]++;
       }
@@ -239,7 +245,7 @@ public class FrequenciesJob {
     private long firstId;
     
     /** counts[c] = num tuples from the partition with label == c */
-    private int[] counts;
+    private int[] counts;//每一个标签 有多少条数据
     
     Frequencies() { }
     
@@ -286,6 +292,7 @@ public class FrequenciesJob {
       }
     }
     
+    //返回每一个partition,一个数组.数组内容是该数组下每一个标签有多少条数据
     public static int[][] extractCounts(Frequencies[] partitions) {
       int[][] counts = new int[partitions.length][];
       for (int p = 0; p < partitions.length; p++) {

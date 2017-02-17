@@ -59,13 +59,14 @@ public class Classifier {
 
   private static final Logger log = LoggerFactory.getLogger(Classifier.class);
 
-  private final Path forestPath;
-  private final Path inputPath;
-  private final Path datasetPath;
   private final Configuration conf;
-  private final Path outputPath; // path that will containt the final output of the classifier
-  private final Path mappersOutputPath; // mappers will output here
-  private double[][] results;
+  
+  private final Path forestPath;//决策树森林路径
+  private final Path datasetPath;//数据title路径
+  private final Path inputPath;//数据源的输入路径
+  private final Path outputPath; // path that will containt the final output of the classifier 最终的输出目录
+  private final Path mappersOutputPath; // mappers will output here 每一个mapp的输出目录
+  private double[][] results;//最终所有的key-value输出,真实标签和预测标签
   
   public double[][] getResults() {
     return results;
@@ -142,10 +143,10 @@ public class Classifier {
     Configuration conf = job.getConfiguration();
     FileSystem fs = mappersOutputPath.getFileSystem(conf);
 
-    Path[] outfiles = DFUtils.listOutputFiles(fs, mappersOutputPath);
+    Path[] outfiles = DFUtils.listOutputFiles(fs, mappersOutputPath);//获取所有的map输出结果
 
     // read all the output
-    List<double[]> resList = new ArrayList<>();
+    List<double[]> resList = new ArrayList<>();//存储所有的key-value信息,每一个key-value组成一个double数组
     for (Path path : outfiles) {
       FSDataOutputStream ofile = null;
       try {
@@ -153,14 +154,14 @@ public class Classifier {
           double key = record.getFirst().get();
           String value = record.getSecond().toString();
           if (ofile == null) {
-            // this is the first value, it contains the name of the input file
+            // this is the first value, it contains the name of the input file 输入路径的名字--即每一个输入路径对应一个输出,内容是真实的标签
             ofile = fs.create(new Path(outputPath, value).suffix(".out"));
           } else {
             // The key contains the correct label of the data. The value contains a prediction
             ofile.writeChars(value); // write the prediction
             ofile.writeChar('\n');
 
-            resList.add(new double[]{key, Double.valueOf(value)});
+            resList.add(new double[]{key, Double.valueOf(value)});//添加真实标签和预测标签
           }
         }
       } finally {
@@ -185,12 +186,12 @@ public class Classifier {
   public static class CMapper extends Mapper<LongWritable, Text, DoubleWritable, Text> {
 
     /** used to convert input values to data instances */
-    private DataConverter converter;
-    private DecisionForest forest;
+    private DataConverter converter;//用于将字符串的输入源转换成Instance对象
+    private DecisionForest forest;//表示一个决策森林
     private final Random rng = RandomUtils.getRandom();
     private boolean first = true;
     private final Text lvalue = new Text();
-    private Dataset dataset;
+    private Dataset dataset;//数据title
     private final DoubleWritable lkey = new DoubleWritable();
 
     @Override
@@ -207,7 +208,7 @@ public class Classifier {
       dataset = Dataset.load(conf, files[0]);
       converter = new DataConverter(dataset);
 
-      forest = DecisionForest.load(conf, files[1]);
+      forest = DecisionForest.load(conf, files[1]);//加载决策森林
       if (forest == null) {
         throw new InterruptedException("DecisionForest not found!");
       }
@@ -218,7 +219,7 @@ public class Classifier {
       if (first) {
         FileSplit split = (FileSplit) context.getInputSplit();
         Path path = split.getPath(); // current split path
-        lvalue.set(path.getName());
+        lvalue.set(path.getName());//对第一条数据先写入数据所在文件名字
         lkey.set(key.get());
         context.write(lkey, lvalue);
 
@@ -227,10 +228,10 @@ public class Classifier {
 
       String line = value.toString();
       if (!line.isEmpty()) {
-        Instance instance = converter.convert(line);
-        double prediction = forest.classify(dataset, rng, instance);
-        lkey.set(dataset.getLabel(instance));
-        lvalue.set(Double.toString(prediction));
+        Instance instance = converter.convert(line);//转换成实例
+        double prediction = forest.classify(dataset, rng, instance);//对该数据进行决策树分析--返回一个合理的标签
+        lkey.set(dataset.getLabel(instance));//实例的真实标签
+        lvalue.set(Double.toString(prediction));//返回该实例的预测分数
         context.write(lkey, lvalue);
       }
     }

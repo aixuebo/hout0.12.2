@@ -38,19 +38,23 @@ import java.util.Random;
 
 /**
  * Builds a classification tree or regression tree<br>
+ * 构造一个分类树或者回归树
  * A classification tree is built when the criterion variable is the categorical attribute.<br>
+ * 分类树用于最终分类标签是分类类型
  * A regression tree is built when the criterion variable is the numerical attribute.
+ * 回归树用于最终分类标签是数值类型
  */
 @Deprecated
 public class DecisionTreeBuilder implements TreeBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(DecisionTreeBuilder.class);
 
-  private static final int[] NO_ATTRIBUTES = new int[0];
+  private static final int[] NO_ATTRIBUTES = new int[0];//表示没有属性可以被选择了
   private static final double EPSILON = 1.0e-6;
 
   /**
    * indicates which CATEGORICAL attributes have already been selected in the parent nodes
+   * 定义已经选择了哪些属性
    */
   private boolean[] selected;
   /**
@@ -105,16 +109,16 @@ public class DecisionTreeBuilder implements TreeBuilder {
   @Override
   public Node build(Random rng, Data data) {
     if (selected == null) {
-      selected = new boolean[data.getDataset().nbAttributes()];
+      selected = new boolean[data.getDataset().nbAttributes()];//总属性数量 
       selected[data.getDataset().getLabelId()] = true; // never select the label
     }
     if (m == 0) {
       // set default m
-      double e = data.getDataset().nbAttributes() - 1;
-      if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
+      double e = data.getDataset().nbAttributes() - 1;//有多少个标签
+      if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {//标签是数字,即回归
         // regression
         m = (int) Math.ceil(e / 3.0);
-      } else {
+      } else {//标签是分类
         // classification
         m = (int) Math.ceil(Math.sqrt(e));
       }
@@ -124,13 +128,13 @@ public class DecisionTreeBuilder implements TreeBuilder {
       return new Leaf(Double.NaN);
     }
 
-    double sum = 0.0;
-    if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
+    double sum = 0.0;//所有标签的数值和
+    if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {//标签属性是数字--回归
       // regression
       // sum and sum squared of a label is computed
-      double sumSquared = 0.0;
-      for (int i = 0; i < data.size(); i++) {
-        double label = data.getDataset().getLabel(data.get(i));
+      double sumSquared = 0.0;//计算所有标签值的平方
+      for (int i = 0; i < data.size(); i++) {//每一个数据的标签值
+        double label = data.getDataset().getLabel(data.get(i));//标签值
         sum += label;
         sumSquared += label * label;
       }
@@ -149,12 +153,12 @@ public class DecisionTreeBuilder implements TreeBuilder {
         log.debug("variance({}) < minVariance({}) Leaf({})", var / data.size(), minVariance, sum / data.size());
         return new Leaf(sum / data.size());
       }
-    } else {
+    } else {//标签属性是分类
       // classification
-      if (isIdentical(data)) {
-        return new Leaf(data.majorityLabel(rng));
+      if (isIdentical(data)) {//true说明所有的数据data内容都一样
+        return new Leaf(data.majorityLabel(rng));//返回一个最大概率的标签
       }
-      if (data.identicalLabel()) {
+      if (data.identicalLabel()) {//true表示所有的数据对应的标签都是相同的,即只有一个标签内容
         return new Leaf(data.getDataset().getLabel(data.get(0)));
       }
     }
@@ -164,16 +168,16 @@ public class DecisionTreeBuilder implements TreeBuilder {
       fullSet = data;
     }
 
-    int[] attributes = randomAttributes(rng, selected, m);
-    if (attributes == null || attributes.length == 0) {
+    int[] attributes = randomAttributes(rng, selected, m);//随机选若干个属性
+    if (attributes == null || attributes.length == 0) {//说明没有属性可以选择了
       // we tried all the attributes and could not split the data anymore
       double label;
       if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
         // regression
-        label = sum / data.size();
+        label = sum / data.size();//计算平均值--归回
       } else {
         // classification
-        label = data.majorityLabel(rng);
+        label = data.majorityLabel(rng);//计算概率最大的分类
       }
       log.warn("attribute which can be selected is not found Leaf({})", label);
       return new Leaf(label);
@@ -189,7 +193,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       }
     }
 
-    // find the best split
+    // find the best split 选择一个最好的属性
     Split best = null;
     for (int attr : attributes) {
       Split split = igSplit.computeSplit(data, attr);
@@ -199,7 +203,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
 
     // information gain is near to zero.
-    if (best.getIg() < EPSILON) {
+    if (best.getIg() < EPSILON) {//小于最小阀值,因此不再继续
       double label;
       if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
         label = sum / data.size();
@@ -222,6 +226,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     if (data.getDataset().isNumerical(best.getAttr())) {
       boolean[] temp = null;
 
+      //将该属性拆分成两组
       Data loSubset = data.subset(Condition.lesser(best.getAttr(), best.getSplit()));
       Data hiSubset = data.subset(Condition.greaterOrEquals(best.getAttr(), best.getSplit()));
 
@@ -259,7 +264,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
 
       childNode = new NumericalNode(best.getAttr(), best.getSplit(), loChild, hiChild);
     } else { // CATEGORICAL attribute
-      double[] values = data.values(best.getAttr());
+      double[] values = data.values(best.getAttr());//所有属性值
 
       // tree is complemented
       Collection<Double> subsetValues = null;
@@ -271,14 +276,14 @@ public class DecisionTreeBuilder implements TreeBuilder {
         values = fullSet.values(best.getAttr());
       }
 
-      int cnt = 0;
-      Data[] subsets = new Data[values.length];
+      int cnt = 0;//有多少个分类要进行进一步的解析
+      Data[] subsets = new Data[values.length];//每一个分类都是一个数据集
       for (int index = 0; index < values.length; index++) {
         if (complemented && !subsetValues.contains(values[index])) {
           continue;
         }
         subsets[index] = data.subset(Condition.equals(best.getAttr(), values[index]));
-        if (subsets[index].size() >= minSplitNum) {
+        if (subsets[index].size() >= minSplitNum) {//说明要进一步解析
           cnt++;
         }
       }
@@ -312,7 +317,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
           children[index] = new Leaf(label);
           continue;
         }
-        children[index] = build(rng, subsets[index]);
+        children[index] = build(rng, subsets[index]);//构建每一个子树
       }
 
       selected[best.getAttr()] = alreadySelected;
@@ -328,20 +333,23 @@ public class DecisionTreeBuilder implements TreeBuilder {
    *
    * @return true is all the vectors are identical or the data is empty<br>
    *         false otherwise
+   * true表示所有的记录的内容都相同
    */
   private boolean isIdentical(Data data) {
     if (data.isEmpty()) {
       return true;
     }
 
-    Instance instance = data.get(0);
-    for (int attr = 0; attr < selected.length; attr++) {
+    Instance instance = data.get(0);//获取第一行数据
+    
+    //每一个属性在所有的数据中对应值是否都相同
+    for (int attr = 0; attr < selected.length; attr++) {//循环每一个属性
       if (selected[attr]) {
         continue;
       }
 
-      for (int index = 1; index < data.size(); index++) {
-        if (data.get(index).get(attr) != instance.get(attr)) {
+      for (int index = 1; index < data.size(); index++) {//循环每一行数据
+        if (data.get(index).get(attr) != instance.get(attr)) {//判断每一行的数据关于该属性都与第一行相同
           return false;
         }
       }
@@ -371,12 +379,12 @@ public class DecisionTreeBuilder implements TreeBuilder {
    * Randomly selects m attributes to consider for split, excludes IGNORED and LABEL attributes
    *
    * @param rng      random-numbers generator
-   * @param selected attributes' state (selected or not)
-   * @param m        number of attributes to choose
+   * @param selected attributes' state (selected or not) 标识一个属性是否已经被选择了
+   * @param m        number of attributes to choose 决定要选择多少个属性
    * @return list of selected attributes' indices, or null if all attributes have already been selected
    */
   private static int[] randomAttributes(Random rng, boolean[] selected, int m) {
-    int nbNonSelected = 0; // number of non selected attributes
+    int nbNonSelected = 0; // number of non selected attributes 目前还没有被选择的属性数量
     for (boolean sel : selected) {
       if (!sel) {
         nbNonSelected++;
@@ -389,7 +397,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
 
     int[] result;
-    if (nbNonSelected <= m) {
+    if (nbNonSelected <= m) {//属性所有的没选择的属性 都要,还没有达到需求m的个数,因此就都要了
       // return all non selected attributes
       result = new int[nbNonSelected];
       int index = 0;
@@ -398,7 +406,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
           result[index++] = attr;
         }
       }
-    } else {
+    } else {//随机选择m个
       result = new int[m];
       for (int index = 0; index < m; index++) {
         // randomly choose a "non selected" attribute
@@ -411,7 +419,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
         selected[rind] = true; // temporarily set the chosen attribute to be selected
       }
 
-      // the chosen attributes are not yet selected
+      // the chosen attributes are not yet selected 将选择的再次设置为false,因为还没有真正执行
       for (int attr : result) {
         selected[attr] = false;
       }

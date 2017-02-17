@@ -43,7 +43,7 @@ import java.util.Random;
 @Deprecated
 public class DecisionForest implements Writable {
   
-  private final List<Node> trees;
+  private final List<Node> trees;//每一个Node都是一棵树,即例如DecisionTreeBuilder对象
   
   private DecisionForest() {
     trees = new ArrayList<>();
@@ -61,6 +61,8 @@ public class DecisionForest implements Writable {
 
   /**
    * Classifies the data and calls callback for each classification
+   * 对所有的数据进行预测,每一颗树都给与一个推荐的标签序号
+   * 参数predictions第一个数组表示多少条数据,有多少条数据,就有多少个数组,第二层数组表示该第一条数据在每一个决策树中的最终决策标签序号
    */
   public void classify(Data data, double[][] predictions) {
     Preconditions.checkArgument(data.size() == predictions.length, "predictions.length must be equal to data.size()");
@@ -69,13 +71,13 @@ public class DecisionForest implements Writable {
       return; // nothing to classify
     }
 
-    int treeId = 0;
-    for (Node tree : trees) {
-      for (int index = 0; index < data.size(); index++) {
+    int treeId = 0;//表示当前操作的是第几颗树
+    for (Node tree : trees) {//循环每一颗树
+      for (int index = 0; index < data.size(); index++) {//循环每一行数据
         if (predictions[index] == null) {
           predictions[index] = new double[trees.size()];
         }
-        predictions[index][treeId] = tree.classify(data.get(index));
+        predictions[index][treeId] = tree.classify(data.get(index));//该树对该数据进行预测
       }
       treeId++;
     }
@@ -87,13 +89,14 @@ public class DecisionForest implements Writable {
    * @param rng
    *          Random number generator, used to break ties randomly
    * @return NaN if the label cannot be predicted
+   * 为某一个数据进行--返回综合考虑后的标签值
    */
   public double classify(Dataset dataset, Random rng, Instance instance) {
-    if (dataset.isNumerical(dataset.getLabelId())) {
-      double sum = 0;
-      int cnt = 0;
-      for (Node tree : trees) {
-        double prediction = tree.classify(instance);
+    if (dataset.isNumerical(dataset.getLabelId())) {//该数据的标签是整数类型的,即回归问题---返回所有决策树的平均值
+      double sum = 0;//所有决策树的总分数
+      int cnt = 0;//有多少颗树对该记录有决策行为
+      for (Node tree : trees) {//循环所有的决策树中每一颗树
+        double prediction = tree.classify(instance);//返回该树对该记录的标签分数
         if (!Double.isNaN(prediction)) {
           sum += prediction;
           cnt++;
@@ -101,29 +104,30 @@ public class DecisionForest implements Writable {
       }
 
       if (cnt > 0) {
-        return sum / cnt;
+        return sum / cnt;//获取平均值
       } else {
         return Double.NaN;
       }
-    } else {
-      int[] predictions = new int[dataset.nblabels()];
+    } else {//该数据属于分类标签
+      int[] predictions = new int[dataset.nblabels()];//有多少个label属性,即每一个label属性对应一个分数---即每一个label被多少个决策树打分了
       for (Node tree : trees) {
-        double prediction = tree.classify(instance);
+        double prediction = tree.classify(instance);//每一颗树都打一个分类
         if (!Double.isNaN(prediction)) {
           predictions[(int) prediction]++;
         }
       }
 
-      if (DataUtils.sum(predictions) == 0) {
+      if (DataUtils.sum(predictions) == 0) {//说明没有预测出来
         return Double.NaN; // no prediction available
       }
 
-      return DataUtils.maxindex(rng, predictions);
+      return DataUtils.maxindex(rng, predictions);//找到values中最大值的index位置
     }
   }
   
   /**
    * @return Mean number of nodes per tree
+   * 平均每一个树包含多少个节点
    */
   public long meanNbNodes() {
     long sum = 0;
@@ -137,12 +141,13 @@ public class DecisionForest implements Writable {
   
   /**
    * @return Total number of nodes in all the trees
+   * 所有的树包含多少个节点
    */
   public long nbNodes() {
     long sum = 0;
     
     for (Node tree : trees) {
-      sum += tree.nbNodes();
+      sum += tree.nbNodes();//返回该节点组成的树一共包括自己 有多少个节点
     }
     
     return sum;
@@ -150,6 +155,7 @@ public class DecisionForest implements Writable {
   
   /**
    * @return Mean maximum depth per tree
+   * 平均最大深度
    */
   public long meanMaxDepth() {
     long sum = 0;

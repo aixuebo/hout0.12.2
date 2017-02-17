@@ -31,6 +31,7 @@ import java.util.Random;
 
 /**
  * Builds a Random Decision Forest using a given TreeBuilder to grow the trees
+ * 构造随机的一颗决策森林
  */
 @Deprecated
 public class SequentialBuilder {

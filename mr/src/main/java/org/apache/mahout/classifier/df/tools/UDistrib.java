@@ -72,12 +72,15 @@ public final class UDistrib {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
+    //数据内容路径
     Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
       abuilder.withName("data").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
     
+    //数据title路径
     Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true).withArgument(
       abuilder.withName("dataset").withMinimum(1).create()).withDescription("Dataset path").create();
     
+    //输出路径
     Option outputOpt = obuilder.withLongName("output").withShortName("o").withRequired(true).withArgument(
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
       "Path to generated files").create();
@@ -136,6 +139,7 @@ public final class UDistrib {
     Path partsPath = new Path(tempFile.toString());
     FileSystem pfs = partsPath.getFileSystem(conf);
     
+    //每个partition创建一个文件对象
     Path[] partPaths = new Path[numPartitions];
     FSDataOutputStream[] files = new FSDataOutputStream[numPartitions];
     for (int p = 0; p < numPartitions; p++) {
@@ -147,7 +151,7 @@ public final class UDistrib {
     Dataset dataset = Dataset.load(conf, datasetPath);
     
     // currents[label] = next partition file where to place the tuple
-    int[] currents = new int[dataset.nblabels()];
+    int[] currents = new int[dataset.nblabels()];//返回有多少个label 标签属性
     
     // currents is initialized randomly in the range [0, numpartitions[
     Random random = RandomUtils.getRandom();
@@ -163,8 +167,8 @@ public final class UDistrib {
     DataConverter converter = new DataConverter(dataset);
     
     int id = 0;
-    while (scanner.hasNextLine()) {
-      if (id % 1000 == 0) {
+    while (scanner.hasNextLine()) {//读取一行数据
+      if (id % 1000 == 0) {//1000条数据一次打印日志
         log.info("progress : {}", id);
       }
       
@@ -174,8 +178,8 @@ public final class UDistrib {
       }
       
       // write the tuple in files[tuple.label]
-      Instance instance = converter.convert(line);
-      int label = (int) dataset.getLabel(instance);
+      Instance instance = converter.convert(line);//转换该数据
+      int label = (int) dataset.getLabel(instance);//获取该数据对应的标签
       files[currents[label]].writeBytes(line);
       files[currents[label]].writeChar('\n');
       
@@ -192,7 +196,7 @@ public final class UDistrib {
       Closeables.close(file, false);
     }
     
-    // merge all output files
+    // merge all output files 合并所有的输出文件
     FileUtil.copyMerge(pfs, partsPath, fs, outputPath, true, conf, null);
     /*
      * FSDataOutputStream joined = fs.create(new Path(outputPath, "uniform.data")); for (int p = 0; p <

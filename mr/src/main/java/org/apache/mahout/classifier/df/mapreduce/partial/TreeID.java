@@ -22,11 +22,12 @@ import org.apache.hadoop.io.LongWritable;
 
 /**
  * Indicates both the tree and the data partition used to grow the tree
+ * 代表一棵树
  */
 @Deprecated
 public class TreeID extends LongWritable implements Cloneable {
   
-  public static final int MAX_TREEID = 100000;
+  public static final int MAX_TREEID = 100000;//表示一个partition最多能有100000个决策树
   
   public TreeID() { }
   
@@ -36,17 +37,20 @@ public class TreeID extends LongWritable implements Cloneable {
     set(partition, treeId);
   }
   
+  //设置long值,该long值表示partition和该partition上第几个tree
   public void set(int partition, int treeId) {
     set((long) partition * MAX_TREEID + treeId);
   }
   
   /**
    * Data partition (InputSplit's index) that was used to grow the tree
+   * 获取第几个partition
    */
   public int partition() {
     return (int) (get() / MAX_TREEID);
   }
   
+  //获取该partition上第几个tree
   public int treeId() {
     return (int) (get() % MAX_TREEID);
   }

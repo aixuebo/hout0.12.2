@@ -161,20 +161,23 @@ public class DefaultTreeBuilder implements TreeBuilder {
    *
    * @return true is all the vectors are identical or the data is empty<br>
    *         false otherwise
+   * true表示所有的记录的内容都相同
    */
   private boolean isIdentical(Data data) {
     if (data.isEmpty()) {
       return true;
     }
 
-    Instance instance = data.get(0);
-    for (int attr = 0; attr < selected.length; attr++) {
+    Instance instance = data.get(0);//获取第一行数据
+    
+    //每一个属性在所有的数据中对应值是否都相同
+    for (int attr = 0; attr < selected.length; attr++) {//循环每一个属性
       if (selected[attr]) {
         continue;
       }
 
-      for (int index = 1; index < data.size(); index++) {
-        if (data.get(index).get(attr) != instance.get(attr)) {
+      for (int index = 1; index < data.size(); index++) {//循环每一行数据
+        if (data.get(index).get(attr) != instance.get(attr)) {//判断每一行的数据关于该属性都与第一行相同
           return false;
         }
       }

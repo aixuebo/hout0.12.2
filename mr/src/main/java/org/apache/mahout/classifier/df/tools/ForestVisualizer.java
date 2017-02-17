@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This tool is to visualize the Decision Forest
+ * 决策森林的可视化
  */
 @Deprecated
 public final class ForestVisualizer {
@@ -54,7 +55,7 @@ public final class ForestVisualizer {
 
     List<Node> trees;
     try {
-      Method getTrees = forest.getClass().getDeclaredMethod("getTrees");
+      Method getTrees = forest.getClass().getDeclaredMethod("getTrees");//返回决策树森林中所有的决策树集合
       getTrees.setAccessible(true);
       trees = (List<Node>) getTrees.invoke(forest);
     } catch (IllegalAccessException e) {
@@ -69,7 +70,7 @@ public final class ForestVisualizer {
     StringBuilder buff = new StringBuilder();
     for (Node tree : trees) {
       buff.append("Tree[").append(cnt).append("]:");
-      buff.append(TreeVisualizer.toString(tree, dataset, attrNames));
+      buff.append(TreeVisualizer.toString(tree, dataset, attrNames));//打印该决策树
       buff.append('\n');
       cnt++;
     }
@@ -110,10 +111,12 @@ public final class ForestVisualizer {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
+    //数据title
     Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true)
       .withArgument(abuilder.withName("dataset").withMinimum(1).withMaximum(1).create())
       .withDescription("Dataset path").create();
 
+    //决策森林路径
     Option modelOpt = obuilder.withLongName("model").withShortName("m").withRequired(true)
       .withArgument(abuilder.withName("path").withMinimum(1).withMaximum(1).create())
       .withDescription("Path to the Decision Forest").create();
@@ -140,6 +143,7 @@ public final class ForestVisualizer {
   
       String datasetName = cmdLine.getValue(datasetOpt).toString();
       String modelName = cmdLine.getValue(modelOpt).toString();
+      
       String[] attrNames = null;
       if (cmdLine.hasOption(attrNamesOpt)) {
         Collection<String> names = (Collection<String>) cmdLine.getValues(attrNamesOpt);

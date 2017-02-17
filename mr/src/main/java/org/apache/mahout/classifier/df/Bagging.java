@@ -38,7 +38,7 @@ public class Bagging {
   
   private final Data data;
   
-  private final boolean[] sampled;
+  private final boolean[] sampled;//true表示原始数据中哪一个位置的数据被抽样到了
   
   public Bagging(TreeBuilder treeBuilder, Data data) {
     this.treeBuilder = treeBuilder;

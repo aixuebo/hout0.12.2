@@ -52,13 +52,14 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
   private Random rng;
 
-  private Long seed;
+  private Long seed;//随机种子
 
-  private boolean isSingleSeed;
+  private boolean isSingleSeed;//是否所有的map使用相同的随机种子
 
   /**
    * Used for DEBUG purposes only. if true and a seed is available, all the mappers use the same seed, thus
    * all the mapper should take the same time to build their trees.
+   * 是否所有的map使用相同的随机种子
    */
   private static boolean isSingleSeed(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.single.seed", false);
@@ -71,6 +72,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     return new InMemRecordReader((InMemInputSplit) split);
   }
 
+  //有多少个map任务,就拆分成多少个数据块,即让map并行
   @Override
   public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
@@ -79,11 +81,12 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     return getSplits(conf, numSplits);
   }
 
+  //numSplits是map的数量
   public List<InputSplit> getSplits(Configuration conf, int numSplits) {
-    int nbTrees = Builder.getNbTrees(conf);
-    int splitSize = nbTrees / numSplits;
+    int nbTrees = Builder.getNbTrees(conf);//构建多少颗决策树
+    int splitSize = nbTrees / numSplits;//即每一个map要产生多少个决策树
 
-    seed = Builder.getRandomSeed(conf);
+    seed = Builder.getRandomSeed(conf);//产生随机种子
     isSingleSeed = isSingleSeed(conf);
 
     if (rng != null && seed != null) {
@@ -93,7 +96,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
     rng = seed == null || isSingleSeed ? null : RandomUtils.getRandom(seed);
 
-    int id = 0;
+    int id = 0;//一共产生了多少颗随机决策树了
 
     List<InputSplit> splits = new ArrayList<>(numSplits);
 
@@ -103,7 +106,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     }
 
     // take care of the remainder
-    splits.add(new InMemInputSplit(id, nbTrees - id, nextSeed()));
+    splits.add(new InMemInputSplit(id, nbTrees - id, nextSeed()));//产生剩余的随机决策树
 
     return splits;
   }
@@ -121,17 +124,19 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     }
   }
 
+  //如何处理每一个InMemInputSplit,让mapper处理
   public static class InMemRecordReader extends RecordReader<IntWritable,NullWritable> {
 
     private final InMemInputSplit split;
-    private int pos;
-    private IntWritable key;
+    private int pos;//已经产生多少个决策树了
+    private IntWritable key;//决策树编号--该编号是在全局中的决策树序号
     private NullWritable value;
 
     public InMemRecordReader(InMemInputSplit split) {
       this.split = split;
     }
 
+    //构建的决策数量作为进度
     @Override
     public float getProgress() throws IOException {
       return pos == 0 ? 0.0f : (float) (pos - 1) / split.nbTrees;
@@ -172,17 +177,18 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
 
   /**
    * Custom InputSplit that indicates how many trees are built by each mapper
+   * 每一个map执行一个InputSplit对象
    */
   public static class InMemInputSplit extends InputSplit implements Writable {
 
     private static final String[] NO_LOCATIONS = new String[0];
 
     /** Id of the first tree of this split */
-    private int firstId;
+    private int firstId;//该map上第一颗决策树是整体上第几颗决策树
 
-    private int nbTrees;
+    private int nbTrees;//该map要产生多少颗随机决策树
 
-    private Long seed;
+    private Long seed;//随机种子
 
     public InMemInputSplit() { }
 

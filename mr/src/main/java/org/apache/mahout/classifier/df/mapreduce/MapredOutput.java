@@ -29,13 +29,14 @@ import java.util.Arrays;
 /**
  * Used by various implementation to return the results of a build.<br>
  * Contains a grown tree and and its oob predictions.
+ * 被用于实现map的输出,hadoop的输出就是最终的决策树node内容
  */
 @Deprecated
 public class MapredOutput implements Writable, Cloneable {
 
-  private Node tree;
+  private Node tree;//最终的一颗决策树
 
-  private int[] predictions;
+  private int[] predictions;//该值可以为null
 
   public MapredOutput() {
   }

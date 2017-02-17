@@ -125,12 +125,12 @@ public class Data implements Cloneable {
    * 抽样数据
    */
   public Data bagging(Random rng, boolean[] sampled) {
-    int datasize = size();
+    int datasize = size();//总数据大小
     List<Instance> bag = new ArrayList<>(datasize);
     
     for (int i = 0; i < datasize; i++) {
-      int index = rng.nextInt(datasize);
-      bag.add(instances.get(index));
+      int index = rng.nextInt(datasize);//随机产生一个位置
+      bag.add(instances.get(index));//添加该位置到包中
       sampled[index] = true;
     }
     

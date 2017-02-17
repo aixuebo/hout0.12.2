@@ -56,9 +56,11 @@ public final class Frequencies extends Configured implements Tool {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
+    //数据的输入路径
     Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
       abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
     
+    //数据title的数据路径
     Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true).withArgument(
       abuilder.withName("path").withMinimum(1).create()).withDescription("dataset path").create();
     
@@ -106,6 +108,7 @@ public final class Frequencies extends Configured implements Tool {
     log.info("Computing the frequencies...");
     FrequenciesJob job = new FrequenciesJob(new Path(workingDir, "output"), dataPath, datasetPath);
     
+    //每一个partition数据文件块对应一个数组,数组内是每一个标签有多少条数据对应
     int[][] counts = job.run(getConf());
     
     // outputing the frequencies

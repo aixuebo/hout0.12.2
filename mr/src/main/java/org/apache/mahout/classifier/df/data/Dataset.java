@@ -175,7 +175,7 @@ public class Dataset {
     return values[attr].length;
   }
 
-  //返回有多少个label属性
+  //返回有多少个label 标签属性
   public int nblabels() {
     return values[labelId].length;
   }

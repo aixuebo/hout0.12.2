@@ -33,6 +33,7 @@ import org.apache.mahout.classifier.df.node.NumericalNode;
 
 /**
  * This tool is to visualize the Decision tree
+ * 决策树的可视化--针对一颗决策树
  */
 @Deprecated
 public final class TreeVisualizer {

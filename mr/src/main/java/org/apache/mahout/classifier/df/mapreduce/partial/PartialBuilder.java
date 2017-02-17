@@ -50,6 +50,7 @@ public class PartialBuilder extends Builder {
 
   private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
 
+  //添加数据内容路径以及数据title路径
   public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
     this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
   }
@@ -71,8 +72,8 @@ public class PartialBuilder extends Builder {
     FileInputFormat.setInputPaths(job, getDataPath());
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
     
-    job.setOutputKeyClass(TreeID.class);
-    job.setOutputValueClass(MapredOutput.class);
+    job.setOutputKeyClass(TreeID.class);//每一个key表示一颗决策树的ID
+    job.setOutputValueClass(MapredOutput.class);//决策树的内容
     
     job.setMapperClass(Step1Mapper.class);
     job.setNumReduceTasks(0); // no reducers
@@ -82,6 +83,7 @@ public class PartialBuilder extends Builder {
 
     // For this implementation to work, mapred.map.tasks needs to be set to the actual
     // number of mappers Hadoop will use:
+    //每一个数据块任务,对应一个map
     TextInputFormat inputFormat = new TextInputFormat();
     List<?> splits = inputFormat.getSplits(job);
     if (splits == null || splits.isEmpty()) {
@@ -89,7 +91,7 @@ public class PartialBuilder extends Builder {
     } else {
       int numSplits = splits.size();
       log.info("Setting mapred.map.tasks = {}", numSplits);
-      conf.setInt("mapred.map.tasks", numSplits);
+      conf.setInt("mapred.map.tasks", numSplits);//map数量是不能自己设置的,是根据数据块内容分配的,即自己设置了也没意义
     }
   }
   
@@ -97,7 +99,7 @@ public class PartialBuilder extends Builder {
   protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
-    int numTrees = Builder.getNbTrees(conf);
+    int numTrees = Builder.getNbTrees(conf);//返回多少颗决策树
     
     Path outputPath = getOutputPath(conf);
     
@@ -138,8 +140,8 @@ public class PartialBuilder extends Builder {
     int index = 0;
     for (Path path : outfiles) {
       for (Pair<TreeID,MapredOutput> record : new SequenceFileIterable<TreeID, MapredOutput>(path, conf)) {
-        TreeID key = record.getFirst();
-        MapredOutput value = record.getSecond();
+        TreeID key = record.getFirst();//决策树ID
+        MapredOutput value = record.getSecond();//决策树内容
         if (keys != null) {
           keys[index] = key;
         }

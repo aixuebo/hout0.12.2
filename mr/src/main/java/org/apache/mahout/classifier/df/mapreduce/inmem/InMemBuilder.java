@@ -43,10 +43,12 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 /**
  * MapReduce implementation where each mapper loads a full copy of the data in-memory. The forest trees are
  * splitted across all the mappers
+ * 每一个map加载所有的数据到内存中,产生一颗决策树,决策树森林是所有的map的结果组成的
  */
 @Deprecated
 public class InMemBuilder extends Builder {
   
+  //给定数据内容路径 以及 数据title路径
   public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
     super(treeBuilder, dataPath, datasetPath, seed, conf);
   }
@@ -55,6 +57,7 @@ public class InMemBuilder extends Builder {
     this(treeBuilder, dataPath, datasetPath, null, new Configuration());
   }
   
+  //多少个map任务,就有多少颗决策树产生
   @Override
   protected void configureJob(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
@@ -64,19 +67,20 @@ public class InMemBuilder extends Builder {
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
     
     // put the data in the DistributedCache
-    DistributedCache.addCacheFile(getDataPath().toUri(), conf);
+    DistributedCache.addCacheFile(getDataPath().toUri(), conf);//数据内容路径
     
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(MapredOutput.class);
+    job.setOutputKeyClass(IntWritable.class);//key 决策树编号--该编号是在全局中的决策树序号
+    job.setOutputValueClass(MapredOutput.class);//value就是一颗决策树的node流程
     
     job.setMapperClass(InMemMapper.class);
-    job.setNumReduceTasks(0); // no reducers
+    job.setNumReduceTasks(0); // no reducers 不用reduce
     
     job.setInputFormatClass(InMemInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
   }
   
+  //用于最终job的日志输出,转换成DecisionForest对象
   @Override
   protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
@@ -100,6 +104,7 @@ public class InMemBuilder extends Builder {
   
   /**
    * Process the output, extracting the trees
+   * 会根据所有的决策树结果生成决策森林
    */
   private static DecisionForest processOutput(Map<Integer,MapredOutput> output) {
     List<Node> trees = new ArrayList<>();

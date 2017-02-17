@@ -53,9 +53,10 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
 
   /**
    * Load the training data
+   * 加载数据path,返回数据内容
    */
   private static Data loadData(Configuration conf, Dataset dataset) throws IOException {
-    Path dataPath = Builder.getDistributedCacheFile(conf, 1);
+    Path dataPath = Builder.getDistributedCacheFile(conf, 1);//加载数据内容
     FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
     return DataLoader.loadData(dataset, fs, dataPath);
   }
@@ -67,14 +68,15 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     Configuration conf = context.getConfiguration();
     
     log.info("Loading the data...");
-    Data data = loadData(conf, getDataset());
+    Data data = loadData(conf, getDataset());//加载数据path,返回数据内容
     log.info("Data loaded : {} instances", data.size());
     
     bagging = new Bagging(getTreeBuilder(), data);
   }
   
+  //不考虑数据文件,因为所有数据文件都已经在内存加载好了
   @Override
-  protected void map(IntWritable key,
+  protected void map(IntWritable key,//决策树编号--该编号是在全局中的决策树序号
                      NullWritable value,
                      Context context) throws IOException, InterruptedException {
     map(key, context);
@@ -82,19 +84,21 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
   
   void map(IntWritable key, Context context) throws IOException, InterruptedException {
     
+	//每一个map任务都随机产生一个随机数
     initRandom((InMemInputSplit) context.getInputSplit());
     
     log.debug("Building...");
-    Node tree = bagging.build(rng);
+    Node tree = bagging.build(rng);//随机构建一颗决策树
     
     if (isOutput()) {
       log.debug("Outputing...");
       MapredOutput mrOut = new MapredOutput(tree);
       
-      context.write(key, mrOut);
+      context.write(key, mrOut);//key不重要,重要的是value
     }
   }
   
+  //初始化随机对象
   void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();

@@ -32,6 +32,8 @@ import java.util.TreeSet;
  * <p>Optimized implementation of IgSplit.优化的实现
  * 
  * This class can be used when the criterion variable is the categorical attribute.</p>
+ * 这个实现用于最终标签是分类标签时候使用
+ * 
  * 优化在分类属性方面没有太大的优化,但是在数值属性方面,只最多获取16个属性进行运算,从中查找合适的值作为决策树,也通过这16个值计算信息熵,这16个值是所有值的均值
  * 
  * <p>This code was changed in MAHOUT-1419 to deal in sampled splits among numeric

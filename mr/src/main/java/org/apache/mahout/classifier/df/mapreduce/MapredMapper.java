@@ -31,7 +31,7 @@ import java.io.IOException;
 @Deprecated
 public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
   
-  private boolean noOutput;
+  private boolean noOutput;//是否debug
   
   private TreeBuilder treeBuilder;
   
